@@ -80,25 +80,33 @@ db_url = os.environ.get('DATABASE_URL', 'sqlite:///cafes.db')
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 # ────────────────────────────────────────────────────────────
-
 app.config.update(
-    SECRET_KEY                = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
-    SQLALCHEMY_DATABASE_URI   = db_url,
-    SQLALCHEMY_TRACK_MODIFICATIONS = False,
+    SECRET_KEY=os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
+    SQLALCHEMY_DATABASE_URI=db_url,
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+
+    # ── ADD THIS NEW BLOCK ──────────────────────────────────
+    SQLALCHEMY_ENGINE_OPTIONS={
+        "pool_pre_ping": True,  # Verifies connection is alive before using it
+        "pool_recycle": 300,  # Recycles connections every 5 minutes automatically
+    },
+    # ────────────────────────────────────────────────────────
 
     # ── JWT CONFIG ──────────────────────────────────────────
-    JWT_SECRET_KEY            = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production'),
-    JWT_ACCESS_TOKEN_EXPIRES  = timedelta(hours=24),
+    JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production'),
+    JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=24),
 
     # ── EMAIL CONFIG ────────────────────────────────────────
-    MAIL_SERVER               = os.environ.get('MAIL_SERVER',   'smtp.gmail.com'),
-    MAIL_PORT                 = int(os.environ.get('MAIL_PORT', 587)),
-    MAIL_USE_TLS              = True,
-    MAIL_USERNAME             = os.environ.get('MAIL_USERNAME', 'your@email.com'),
-    MAIL_PASSWORD             = os.environ.get('MAIL_PASSWORD', 'your-app-password'),
-    MAIL_DEFAULT_SENDER       = os.environ.get('MAIL_USERNAME', 'your@email.com'),
-    BASE_URL                  = os.environ.get('BASE_URL', 'http://localhost:5000'),
+    MAIL_SERVER=os.environ.get('MAIL_SERVER', 'smtp.gmail.com'),
+    MAIL_PORT=int(os.environ.get('MAIL_PORT', 587)),
+    MAIL_USE_TLS=True,
+    MAIL_USERNAME=os.environ.get('MAIL_USERNAME', 'your@email.com'),
+    MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD', 'your-app-password'),
+    MAIL_DEFAULT_SENDER=os.environ.get('MAIL_USERNAME', 'your@email.com'),
+    BASE_URL=os.environ.get('BASE_URL', 'http://localhost:5000'),
 )
+
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
