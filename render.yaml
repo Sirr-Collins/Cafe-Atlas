@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: cafe-atlas
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: BASE_URL
+        value: https://cafe-atlas.onrender.com
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USERNAME
+        sync: false   # entered manually in Render dashboard
+      - key: MAIL_PASSWORD
+        sync: false   # entered manually in Render dashboard

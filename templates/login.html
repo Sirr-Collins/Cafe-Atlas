@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — Café Atlas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--cream:#f5f0e8;--espresso:#2b1a0e;--roast:#5c3317;--caramel:#c0854a;--foam:#faf7f2;--muted-txt:#8a7060;}
+    body{background:var(--cream);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+    .navbar{background:var(--espresso)!important;}
+    .navbar-brand{font-family:'Playfair Display',serif;font-size:1.4rem;color:#fff!important;}
+    .navbar-brand span{color:var(--caramel);}
+    .auth-wrapper{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+    .auth-card{background:var(--foam);border-radius:20px;box-shadow:0 8px 40px rgba(43,26,14,.12);padding:40px;width:100%;max-width:440px;}
+    .auth-title{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--espresso);margin-bottom:6px;}
+    .auth-sub{color:var(--muted-txt);font-size:.9rem;margin-bottom:28px;}
+    .form-label{font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted-txt);font-weight:500;}
+    .form-control{background:var(--cream)!important;border-color:#ddd5c8!important;color:var(--espresso)!important;padding:12px 14px;}
+    .form-control:focus{border-color:var(--caramel)!important;box-shadow:0 0 0 3px rgba(192,133,74,.15)!important;}
+    .btn-espresso{background:var(--espresso);color:#fff;border:none;padding:12px;border-radius:8px;font-weight:500;width:100%;font-size:1rem;transition:background .2s;}
+    .btn-espresso:hover{background:var(--roast);color:#fff;}
+    .divider{display:flex;align-items:center;gap:12px;color:var(--muted-txt);font-size:.82rem;margin:20px 0;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:#ddd5c8;}
+    .auth-link{color:var(--caramel);text-decoration:none;font-weight:500;}
+    .auth-link:hover{color:var(--roast);}
+    .error-box{background:#fdecea;border:1px solid #f5c6c6;border-radius:8px;padding:12px 16px;font-size:.88rem;color:#9b3535;display:none;margin-bottom:16px;}
+  </style>
+</head>
+<body>
+
+<nav class="navbar py-2 px-4">
+  <a class="navbar-brand" href="/">☕ <span>Café</span>Atlas</a>
+</nav>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <h2 class="auth-title">Welcome back</h2>
+    <p class="auth-sub">Sign in to your Café Atlas account</p>
+
+    <div class="error-box" id="error-box">
+      <i class="bi bi-exclamation-circle me-2"></i>
+      <span id="error-msg"></span>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Email Address</label>
+      <input id="email" type="email" class="form-control" placeholder="you@example.com"/>
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Password</label>
+      <input id="password" type="password" class="form-control" placeholder="••••••••"/>
+    </div>
+    <div class="text-end mb-4">
+      <a href="/forgot-password" class="auth-link" style="font-size:.85rem">Forgot password?</a>
+    </div>
+
+    <button class="btn-espresso btn mb-3" id="login-btn">
+      <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+    </button>
+
+    <div class="divider">or</div>
+
+    <p class="text-center text-muted" style="font-size:.88rem">
+      Don't have an account?
+      <a href="/register" class="auth-link">Create one free</a>
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  LOGIN PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  const btn      = document.getElementById('login-btn');
+  const emailEl  = document.getElementById('email');
+  const passEl   = document.getElementById('password');
+
+  // ── Wire up button click ──────────────────────────────────────────────────
+  btn.addEventListener('click', handleLogin);
+
+  // ── Wire up Enter key on both fields ─────────────────────────────────────
+  emailEl.addEventListener('keydown',  e => { if (e.key === 'Enter') handleLogin(); });
+  passEl.addEventListener('keydown',   e => { if (e.key === 'Enter') handleLogin(); });
+
+  // ── Main login function ───────────────────────────────────────────────────
+  async function handleLogin() {
+    const email    = emailEl.value.trim();
+    const password = passEl.value;
+
+    if (!email || !password) {
+      showError('Please enter your email and password.');
+      return;
+    }
+
+    // Show loading state
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing in…';
+
+    try {
+      const res  = await fetch('/auth/login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showError(data.error || 'Login failed. Please try again.');
+        resetBtn();
+        return;
+      }
+
+      // ── Validate token exists before storing ─────────────────────────────
+      if (!data.token) {
+        showError('Server did not return a token. Check Flask terminal for errors.');
+        console.error('No token in response:', data);
+        resetBtn();
+        return;
+      }
+
+      if (!data.user) {
+        showError('Server did not return user data.');
+        console.error('No user in response:', data);
+        resetBtn();
+        return;
+      }
+
+      // ── Store in localStorage ─────────────────────────────────────────────
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user',  JSON.stringify(data.user));
+
+      // ── Verify what was stored (debug) ────────────────────────────────────
+      const storedToken = localStorage.getItem('token');
+      const storedUser  = localStorage.getItem('user');
+      console.log('Stored token (first 30 chars):', storedToken?.substring(0, 30));
+      console.log('Stored user:', storedUser);
+
+      if (!storedToken || storedToken === 'undefined') {
+        showError('Failed to save session. Please try again.');
+        console.error('localStorage write failed!');
+        resetBtn();
+        return;
+      }
+
+      // ── Redirect ──────────────────────────────────────────────────────────
+      const destination = data.user.role === 'admin' ? '/admin' : '/';
+      console.log('Redirecting to:', destination);
+      window.location.href = destination;
+
+    } catch (err) {
+      showError('Could not connect to the server. Is Flask running on port 5000?');
+      console.error('Fetch error:', err);
+      resetBtn();
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function showError(msg) {
+    const box = document.getElementById('error-box');
+    document.getElementById('error-msg').textContent = msg;
+    box.style.display = 'block';
+  }
+
+  function resetBtn() {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';
+  }
+
+});
+</script>
+</body>
+</html>

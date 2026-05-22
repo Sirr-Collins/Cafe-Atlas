@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — Café Atlas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream:#f5f0e8; --warm:#ede5d4; --espresso:#2b1a0e; --roast:#5c3317;
+      --caramel:#c0854a; --latte:#d4b896; --foam:#faf7f2; --muted-txt:#8a7060;
+      --card-bg:#faf7f2; --body-bg:#f5f0e8; --text:#2b1a0e; --border:#ddd5c8;
+      --table-head:#ede5d4; --table-stripe:#faf7f2;
+    }
+    [data-theme="dark"] {
+      --body-bg:#1a1008; --card-bg:#2a1c10; --foam:#2a1c10; --cream:#1a1008;
+      --warm:#2f1f12; --text:#f0e8d8; --muted-txt:#a08878; --border:#4a3020;
+      --table-head:#2f1f12; --table-stripe:#241510;
+    }
+    /* ── DARK MODE: Full coverage ── */
+    [data-theme="dark"] body                    { background:var(--body-bg); color:var(--text); }
+    [data-theme="dark"] .navbar                 { background:#0f0804!important; }
+    [data-theme="dark"] .stat-card              { background:var(--card-bg); box-shadow:0 4px 16px rgba(0,0,0,.4); }
+    [data-theme="dark"] .stat-num               { color:var(--text); }
+
+    /* Tables */
+    [data-theme="dark"] .admin-table            { background:var(--card-bg); box-shadow:0 4px 16px rgba(0,0,0,.4); }
+    [data-theme="dark"] .admin-table th         { background:var(--table-head); color:var(--muted-txt); }
+    [data-theme="dark"] .admin-table td         { border-color:var(--border); color:var(--text); background:var(--card-bg); }
+    [data-theme="dark"] .table-hover tbody tr:hover td { background:#331f12 !important; }
+
+    /* Search inputs */
+    [data-theme="dark"] .table-search           { background:var(--card-bg); border-color:var(--border); color:var(--text); }
+    [data-theme="dark"] .table-search::placeholder { color:var(--muted-txt); }
+
+    /* Newsletter custom inputs */
+    [data-theme="dark"] #custom-subject,
+    [data-theme="dark"] #custom-body            { background:var(--body-bg)!important; border-color:var(--border)!important; color:var(--text)!important; }
+    [data-theme="dark"] #custom-subject::placeholder,
+    [data-theme="dark"] #custom-body::placeholder { color:var(--muted-txt); }
+
+    /* Tabs */
+    [data-theme="dark"] .admin-tab              { color:var(--muted-txt); }
+    [data-theme="dark"] .admin-tab.active       { color:var(--text); border-bottom-color:var(--caramel); }
+    [data-theme="dark"] .tab-border             { border-color:var(--border); }
+
+    /* Modals */
+    [data-theme="dark"] .modal-content          { background:var(--card-bg); border:1px solid var(--border); }
+    [data-theme="dark"] .modal-header           { border-color:var(--border); }
+    [data-theme="dark"] .modal-footer           { border-color:var(--border); }
+
+    /* Action buttons */
+    [data-theme="dark"] .btn-promote            { background:#1a3a25; color:#a6e3a1; }
+    [data-theme="dark"] .btn-demote             { background:#3a2e00; color:#f0c674; }
+    [data-theme="dark"] .btn-remove             { background:#3a1515; color:#f38ba8; }
+
+    /* Badges */
+    [data-theme="dark"] .role-badge.user        { background:#2f1f12; color:var(--muted-txt); }
+
+    /* Loading overlay */
+    [data-theme="dark"] #loading-overlay        { background:var(--body-bg); }
+
+    /* Back to top */
+    [data-theme="dark"] #back-to-top            { background:var(--caramel); }
+    * { transition:background-color .2s,color .2s,border-color .2s; }
+    body { background:var(--body-bg); color:var(--text); font-family:'DM Sans',sans-serif; }
+
+    /* NAVBAR */
+    .navbar { background:var(--espresso)!important; }
+    .navbar-brand { font-family:'Playfair Display',serif; font-size:1.4rem; color:#fff!important; }
+    .navbar-brand span { color:var(--caramel); }
+    .nav-link-btn { color:rgba(255,255,255,.8); text-decoration:none; font-size:.88rem; padding:6px 14px; border-radius:50px; border:1.5px solid rgba(255,255,255,.2); transition:all .2s; }
+    .nav-link-btn:hover { background:rgba(255,255,255,.1); color:#fff; }
+    .theme-toggle { background:rgba(255,255,255,.1); border:1.5px solid rgba(255,255,255,.2); color:rgba(255,255,255,.8); border-radius:50px; padding:6px 12px; cursor:pointer; font-size:.88rem; transition:all .2s; }
+    .theme-toggle:hover { background:rgba(255,255,255,.2); color:#fff; }
+
+    /* LOADING OVERLAY */
+    #loading-overlay { position:fixed; inset:0; background:var(--body-bg); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; z-index:9999; }
+    #loading-overlay p { color:var(--muted-txt); font-size:.9rem; }
+    #dashboard-content { display:none; }
+
+    /* PAGE TITLE */
+    .page-title { font-family:'Playfair Display',serif; font-size:2rem; }
+
+    /* STAT CARDS */
+    .stat-card { background:var(--card-bg); border-radius:16px; padding:24px; box-shadow:0 4px 16px rgba(43,26,14,.08); border:none; transition:transform .2s; }
+    .stat-card:hover { transform:translateY(-3px); }
+    .stat-num { font-family:'Playfair Display',serif; font-size:2.4rem; color:var(--text); line-height:1; }
+    .stat-label { color:var(--muted-txt); font-size:.85rem; margin-top:4px; }
+    .stat-icon { font-size:1.8rem; opacity:.6; }
+
+    /* TABS */
+    .admin-tab { background:transparent; border:none; padding:10px 20px; color:var(--muted-txt); border-bottom:2.5px solid transparent; font-weight:500; font-size:.92rem; cursor:pointer; transition:all .2s; }
+    .admin-tab.active { color:var(--text); border-bottom-color:var(--caramel); }
+    .tab-border { border-bottom:1px solid var(--warm); margin-bottom:24px; }
+
+    /* SKELETON */
+    .skeleton-row td { padding:14px 18px; }
+    .skeleton-cell { height:14px; border-radius:6px; background:linear-gradient(90deg,var(--warm) 25%,var(--cream) 50%,var(--warm) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* TABLES */
+    .admin-table { background:var(--card-bg); border-radius:14px; overflow:hidden; box-shadow:0 4px 16px rgba(43,26,14,.08); }
+    .admin-table table { margin:0; }
+    .admin-table th { background:var(--table-head); color:var(--muted-txt); font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; font-weight:600; padding:14px 18px; border:none; }
+    .admin-table td { padding:14px 18px; vertical-align:middle; border-color:var(--border); font-size:.9rem; color:var(--text); }
+
+    /* TABLE TOOLBAR */
+    .table-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+    .table-search { background:var(--card-bg); border:1.5px solid var(--border); border-radius:50px; padding:7px 16px; font-size:.84rem; color:var(--text); outline:none; font-family:'DM Sans',sans-serif; min-width:200px; }
+    .table-search:focus { border-color:var(--caramel); }
+    .table-count { color:var(--muted-txt); font-size:.84rem; }
+
+    /* BADGES */
+    .role-badge { padding:3px 12px; border-radius:50px; font-size:.76rem; font-weight:600; }
+    .role-badge.admin { background:#e8f5ee; color:#2d6a4f; }
+    .role-badge.user  { background:var(--warm); color:var(--muted-txt); }
+    .confirmed-yes { color:#2d6a4f; }
+    .confirmed-no  { color:#9b3535; }
+
+    /* ACTION BUTTONS */
+    .btn-sm-action { padding:4px 12px; border-radius:6px; font-size:.8rem; border:none; cursor:pointer; transition:all .2s; }
+    .btn-promote { background:#e8f5ee; color:#2d6a4f; } .btn-promote:hover { background:#2d6a4f; color:#fff; }
+    .btn-demote  { background:#fff3cd; color:#856404; } .btn-demote:hover  { background:#856404; color:#fff; }
+    .btn-remove  { background:#fdecea; color:#9b3535; } .btn-remove:hover  { background:#9b3535; color:#fff; }
+
+    /* MODAL */
+    .modal-content { background:var(--foam); border:none; border-radius:20px; }
+    .modal-title   { font-family:'Playfair Display',serif; }
+
+    /* BACK TO TOP */
+    #back-to-top { position:fixed; bottom:32px; right:32px; z-index:500; background:var(--espresso); color:#fff; border:none; border-radius:50%; width:44px; height:44px; font-size:1.1rem; cursor:pointer; display:none; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(43,26,14,.25); transition:all .25s; }
+    #back-to-top:hover { background:var(--roast); transform:translateY(-2px); }
+    #back-to-top.visible { display:flex; }
+  </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="spinner-border" style="color:var(--caramel);width:2.5rem;height:2.5rem;"></div>
+  <p>Verifying session…</p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard-content">
+
+  <nav class="navbar py-2 px-4 d-flex justify-content-between align-items-center">
+    <a class="navbar-brand" href="/">☕ <span>Café</span>Atlas</a>
+    <div class="d-flex align-items-center gap-2">
+      <span class="text-white opacity-75" style="font-size:.85rem"><i class="bi bi-shield-check me-1"></i>Admin Panel</span>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+        <i class="bi bi-moon-stars" id="theme-icon"></i>
+      </button>
+      <a href="/" class="nav-link-btn"><i class="bi bi-grid me-1"></i>View Site</a>
+      <a href="#" onclick="logout()" class="nav-link-btn"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+    </div>
+  </nav>
+
+  <div class="container py-5">
+    <h1 class="page-title mb-1">Dashboard</h1>
+    <p class="text-muted mb-4">Welcome back, <strong id="admin-name">Admin</strong></p>
+
+    <!-- STAT CARDS -->
+    <div class="row g-3 mb-5">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between">
+            <div><div class="stat-num" id="s-cafes">—</div><div class="stat-label">Total Cafés</div></div>
+            <div class="stat-icon">☕</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between">
+            <div><div class="stat-num" id="s-users">—</div><div class="stat-label">Total Users</div></div>
+            <div class="stat-icon"><i class="bi bi-people" style="color:var(--caramel)"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between">
+            <div><div class="stat-num" id="s-confirmed">—</div><div class="stat-label">Confirmed</div></div>
+            <div class="stat-icon"><i class="bi bi-check-circle" style="color:#2d6a4f"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="d-flex justify-content-between">
+            <div><div class="stat-num" id="s-wifi">—</div><div class="stat-label">Wi‑Fi Cafés</div></div>
+            <div class="stat-icon"><i class="bi bi-wifi" style="color:var(--caramel)"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tab-border">
+      <button class="admin-tab active" onclick="switchTab('cafes',this)"><i class="bi bi-cup-hot me-1"></i>Cafés</button>
+      <button class="admin-tab" onclick="switchTab('users',this)"><i class="bi bi-people me-1"></i>Users</button>
+      <button class="admin-tab" onclick="switchTab('newsletter',this)"><i class="bi bi-envelope me-1"></i>Newsletter</button>
+    </div>
+
+    <!-- CAFES TAB -->
+    <div id="tab-cafes">
+      <div class="table-toolbar">
+        <input class="table-search" id="cafe-search" type="text" placeholder="Search cafés…" oninput="filterCafeTable()"/>
+        <span class="table-count" id="cafe-count"></span>
+      </div>
+      <div class="admin-table">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th><th>Name</th><th>Location</th>
+              <th>Wi‑Fi</th><th>Sockets</th><th>Price</th>
+              <th>Added By</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="cafes-tbody">
+            <!-- skeleton rows -->
+            <tr class="skeleton-row"><td><div class="skeleton-cell" style="width:30px"></div></td><td><div class="skeleton-cell"></div></td><td><div class="skeleton-cell"></div></td><td><div class="skeleton-cell" style="width:24px"></div></td><td><div class="skeleton-cell" style="width:24px"></div></td><td><div class="skeleton-cell" style="width:50px"></div></td><td><div class="skeleton-cell" style="width:80px"></div></td><td><div class="skeleton-cell" style="width:60px"></div></td></tr>
+            <tr class="skeleton-row"><td><div class="skeleton-cell" style="width:30px"></div></td><td><div class="skeleton-cell"></div></td><td><div class="skeleton-cell"></div></td><td><div class="skeleton-cell" style="width:24px"></div></td><td><div class="skeleton-cell" style="width:24px"></div></td><td><div class="skeleton-cell" style="width:50px"></div></td><td><div class="skeleton-cell" style="width:80px"></div></td><td><div class="skeleton-cell" style="width:60px"></div></td></tr>
+            <tr class="skeleton-row"><td><div class="skeleton-cell" style="width:30px"></div></td><td><div class="skeleton-cell"></div></td><td><div class="skeleton-cell"></div></td><td><div class="skeleton-cell" style="width:24px"></div></td><td><div class="skeleton-cell" style="width:24px"></div></td><td><div class="skeleton-cell" style="width:50px"></div></td><td><div class="skeleton-cell" style="width:80px"></div></td><td><div class="skeleton-cell" style="width:60px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS TAB -->
+    <div id="tab-users" style="display:none">
+      <div class="table-toolbar">
+        <input class="table-search" id="user-search" type="text" placeholder="Search users…" oninput="filterUserTable()"/>
+        <span class="table-count" id="user-count"></span>
+      </div>
+      <div class="admin-table">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th><th>Name</th><th>Email</th>
+              <th>Role</th><th>Confirmed</th><th>Joined</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr class="skeleton-row"><td><div class="skeleton-cell" style="width:30px"></div></td><td><div class="skeleton-cell"></div></td><td><div class="skeleton-cell"></div></td><td><div class="skeleton-cell" style="width:60px"></div></td><td><div class="skeleton-cell" style="width:40px"></div></td><td><div class="skeleton-cell" style="width:80px"></div></td><td><div class="skeleton-cell" style="width:120px"></div></td></tr>
+            <tr class="skeleton-row"><td><div class="skeleton-cell" style="width:30px"></div></td><td><div class="skeleton-cell"></div></td><td><div class="skeleton-cell"></div></td><td><div class="skeleton-cell" style="width:60px"></div></td><td><div class="skeleton-cell" style="width:40px"></div></td><td><div class="skeleton-cell" style="width:80px"></div></td><td><div class="skeleton-cell" style="width:120px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NEWSLETTER TAB -->
+    <div id="tab-newsletter" style="display:none">
+
+      <!-- Subscriber Stats -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="d-flex justify-content-between">
+              <div><div class="stat-num" id="ns-total">—</div><div class="stat-label">Total Subscribers</div></div>
+              <div class="stat-icon"><i class="bi bi-people" style="color:var(--caramel)"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="d-flex justify-content-between">
+              <div><div class="stat-num" id="ns-confirmed">—</div><div class="stat-label">Confirmed</div></div>
+              <div class="stat-icon"><i class="bi bi-check-circle" style="color:#2d6a4f"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="d-flex justify-content-between">
+              <div><div class="stat-num" id="ns-unconfirmed">—</div><div class="stat-label">Pending</div></div>
+              <div class="stat-icon"><i class="bi bi-clock" style="color:var(--muted-txt)"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Send Notification -->
+      <div class="row g-4">
+
+        <!-- Quick Notify -->
+        <div class="col-md-6">
+          <div class="stat-card h-100">
+            <h5 style="font-family:'Playfair Display',serif;margin-bottom:8px">
+              <i class="bi bi-bell me-2" style="color:var(--caramel)"></i>Notify New Cafés
+            </h5>
+            <p class="text-muted" style="font-size:.88rem;margin-bottom:20px">
+              Automatically send subscribers an email showcasing recently added cafés.
+              Only cafés added via the app (with an author) will be included.
+            </p>
+            <button class="btn-sm-action btn-promote px-4 py-2" style="font-size:.9rem" onclick="notifyNewCafes()">
+              <i class="bi bi-send me-1"></i> Send New Cafés Notification
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Message -->
+        <div class="col-md-6">
+          <div class="stat-card h-100">
+            <h5 style="font-family:'Playfair Display',serif;margin-bottom:8px">
+              <i class="bi bi-pencil-square me-2" style="color:var(--caramel)"></i>Custom Message
+            </h5>
+            <div class="mb-2">
+              <label style="font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted-txt);font-weight:600">Subject</label>
+              <input id="custom-subject" type="text" placeholder="e.g. Weekend coffee picks ☕"
+                     style="width:100%;background:var(--body-bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;margin-top:4px"/>
+            </div>
+            <div class="mb-3">
+              <label style="font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted-txt);font-weight:600">Message (HTML allowed)</label>
+              <textarea id="custom-body" rows="3" placeholder="<p>Hello from Café Atlas!</p>"
+                        style="width:100%;background:var(--body-bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;resize:vertical;margin-top:4px"></textarea>
+            </div>
+            <button class="btn-sm-action btn-promote px-4 py-2" style="font-size:.9rem" onclick="sendCustomNewsletter()">
+              <i class="bi bi-send me-1"></i> Send Custom Email
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Subscribers Table -->
+      <div class="mt-4">
+        <div class="table-toolbar">
+          <input class="table-search" id="sub-search" type="text" placeholder="Search subscribers…" oninput="filterSubTable()"/>
+          <span class="table-count" id="sub-count"></span>
+        </div>
+        <div class="admin-table">
+          <table class="table table-hover">
+            <thead>
+              <tr><th>ID</th><th>Email</th><th>Confirmed</th><th>Subscribed On</th></tr>
+            </thead>
+            <tbody id="subs-tbody">
+              <tr><td colspan="4" class="text-center py-4"><div class="spinner-border spinner-border-sm" style="color:var(--caramel)"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /tab-newsletter -->
+
+  </div><!-- /container -->
+</div><!-- /dashboard-content -->
+
+<!-- MODALS -->
+<div class="modal fade" id="delCafeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content p-2">
+    <div class="modal-header"><h5 class="modal-title">Delete Café?</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body text-muted" style="font-size:.9rem">Permanently remove <strong id="del-cafe-name"></strong> from the database.</div>
+    <div class="modal-footer">
+      <button class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancel</button>
+      <button class="btn btn-danger px-4" onclick="confirmDeleteCafe()">Delete</button>
+    </div>
+  </div></div>
+</div>
+
+<div class="modal fade" id="delUserModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content p-2">
+    <div class="modal-header"><h5 class="modal-title">Delete User?</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body text-muted" style="font-size:.9rem">Permanently delete <strong id="del-user-name"></strong>'s account.</div>
+    <div class="modal-footer">
+      <button class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancel</button>
+      <button class="btn btn-danger px-4" onclick="confirmDeleteUser()">Delete</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1100">
+  <div id="toast" class="toast align-items-center border-0 text-white bg-dark">
+    <div class="d-flex"><div class="toast-body" id="toast-msg"></div><button class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>
+  </div>
+</div>
+
+<!-- BACK TO TOP -->
+<button id="back-to-top" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="bi bi-arrow-up"></i>
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── DARK MODE (runs before paint to prevent flash) ───────────────────────────
+(function() {
+  const saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+
+// ── BOOTSTRAP INSTANCES ──────────────────────────────────────────────────────
+const bsToast      = new bootstrap.Toast(document.getElementById('toast'), {delay:3000});
+const delCafeModal = new bootstrap.Modal(document.getElementById('delCafeModal'));
+const delUserModal = new bootstrap.Modal(document.getElementById('delUserModal'));
+let pendingDeleteCafeId = null;
+let pendingDeleteUserId = null;
+
+// Cache for live table search
+let allCafesData = [];
+let allUsersData = [];
+
+// ── DARK MODE TOGGLE ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('theme-toggle');
+  const icon   = document.getElementById('theme-icon');
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    icon.className = theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+    localStorage.setItem('theme', theme);
+  }
+  applyTheme(localStorage.getItem('theme') || 'light');
+  toggle.addEventListener('click', () => {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+});
+
+// ── BACK TO TOP ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('back-to-top').classList.toggle('visible', window.scrollY > 300);
+});
+
+// ── BOOT — verify token then load dashboard ──────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+
+  const token = localStorage.getItem('token');
+  const user  = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Step 1 — local check
+  if (!token || user.role !== 'admin') {
+    window.location.href = '/login';
+    return;
+  }
+
+  // Step 2 — verify with Flask
+  try {
+    const check = await fetch('/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!check.ok) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+      return;
+    }
+  } catch (e) {
+    showOverlayError('Cannot connect to Flask. Is the server running?');
+    return;
+  }
+
+  // Step 3 — build authHeaders AFTER token verified
+  const authHeaders = {
+    'Content-Type':  'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+
+  // Step 4 — show dashboard
+  document.getElementById('loading-overlay').style.display   = 'none';
+  document.getElementById('dashboard-content').style.display = 'block';
+  document.getElementById('admin-name').textContent = user.name || 'Admin';
+
+  await loadStats();
+  await loadCafes();
+
+  // ── STATS ────────────────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const res  = await fetch('/admin/stats', { headers: authHeaders });
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || 'Stats failed', 'bg-danger'); return; }
+      document.getElementById('s-cafes').textContent     = data.total_cafes;
+      document.getElementById('s-users').textContent     = data.total_users;
+      document.getElementById('s-confirmed').textContent = data.confirmed_users;
+      document.getElementById('s-wifi').textContent      = data.wifi_cafes;
+    } catch (e) { toast('Could not load stats', 'bg-danger'); }
+  }
+
+  // ── TABS ─────────────────────────────────────────────────────────────────
+  window.switchTab = function(tab, el) {
+    document.getElementById('tab-cafes').style.display       = tab === 'cafes'       ? 'block' : 'none';
+    document.getElementById('tab-users').style.display       = tab === 'users'       ? 'block' : 'none';
+    document.getElementById('tab-newsletter').style.display  = tab === 'newsletter'  ? 'block' : 'none';
+    document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    if (tab === 'users')      loadUsers();
+    if (tab === 'cafes')      loadCafes();
+    if (tab === 'newsletter') loadSubscribers();
+  };
+
+  // ── CAFES TABLE ──────────────────────────────────────────────────────────
+  async function loadCafes() {
+    try {
+      const res  = await fetch('/admin/cafes', { headers: authHeaders });
+      const data = await res.json();
+      if (!res.ok || !data.cafes) {
+        document.getElementById('cafes-tbody').innerHTML =
+          `<tr><td colspan="8" class="text-center text-muted py-4">${data.error || 'No cafés found.'}</td></tr>`;
+        return;
+      }
+      allCafesData = data.cafes;
+      renderCafeTable(allCafesData);
+    } catch (e) { toast('Could not load cafés', 'bg-danger'); }
+  }
+
+  function renderCafeTable(cafes) {
+    document.getElementById('cafe-count').textContent = `${cafes.length} café${cafes.length !== 1 ? 's' : ''}`;
+    document.getElementById('cafes-tbody').innerHTML = cafes.length ? cafes.map(c => `
+      <tr>
+        <td class="text-muted">#${c.id}</td>
+        <td><strong>${c.name}</strong></td>
+        <td>${c.location}</td>
+        <td>${c.has_wifi    ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle text-muted"></i>'}</td>
+        <td>${c.has_sockets ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle text-muted"></i>'}</td>
+        <td>${c.coffee_price || 'N/A'}</td>
+        <td style="font-size:.82rem">
+          ${c.added_by_name
+            ? `<i class="bi bi-person-circle me-1 text-muted"></i>${c.added_by_name}`
+            : '<span class="fst-italic text-muted">Original data</span>'}
+        </td>
+        <td>
+          <button class="btn-sm-action btn-remove" onclick="openDelCafe(${c.id},'${c.name.replace(/'/g,"\\'")}')">
+            <i class="bi bi-trash3"></i> Delete
+          </button>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="8" class="text-center text-muted py-3">No cafés match your search.</td></tr>`;
+  }
+
+  // Live search for cafes table
+  window.filterCafeTable = function() {
+    const q = document.getElementById('cafe-search').value.toLowerCase();
+    renderCafeTable(q ? allCafesData.filter(c =>
+      c.name.toLowerCase().includes(q) || c.location.toLowerCase().includes(q)
+    ) : allCafesData);
+  };
+
+  window.openDelCafe = function(id, name) {
+    pendingDeleteCafeId = id;
+    document.getElementById('del-cafe-name').textContent = name;
+    delCafeModal.show();
+  };
+
+  window.confirmDeleteCafe = async function() {
+    delCafeModal.hide();
+    try {
+      const res  = await fetch(`/cafes/${pendingDeleteCafeId}`, { method:'DELETE', headers:authHeaders });
+      const data = await res.json();
+      toast(res.ok ? data.success : data.error, res.ok ? 'bg-success' : 'bg-danger');
+      if (res.ok) { await loadCafes(); await loadStats(); }
+    } catch (e) { toast('Delete failed', 'bg-danger'); }
+  };
+
+  // ── USERS TABLE ──────────────────────────────────────────────────────────
+  async function loadUsers() {
+    try {
+      const res  = await fetch('/admin/users', { headers: authHeaders });
+      const data = await res.json();
+      if (!res.ok || !data.users) {
+        document.getElementById('users-tbody').innerHTML =
+          `<tr><td colspan="7" class="text-center text-muted py-4">${data.error || 'No users found.'}</td></tr>`;
+        return;
+      }
+      allUsersData = data.users;
+      renderUserTable(allUsersData);
+    } catch (e) { toast('Could not load users', 'bg-danger'); }
+  }
+
+  function renderUserTable(users) {
+    document.getElementById('user-count').textContent = `${users.length} user${users.length !== 1 ? 's' : ''}`;
+    document.getElementById('users-tbody').innerHTML = users.length ? users.map(u => `
+      <tr>
+        <td class="text-muted">#${u.id}</td>
+        <td><strong>${u.name}</strong></td>
+        <td>${u.email}</td>
+        <td><span class="role-badge ${u.role}">${u.role}</span></td>
+        <td>${u.is_confirmed
+              ? '<span class="confirmed-yes"><i class="bi bi-check-circle-fill"></i> Yes</span>'
+              : '<span class="confirmed-no"><i class="bi bi-x-circle"></i> No</span>'}</td>
+        <td class="text-muted" style="font-size:.8rem">${u.created_at ? u.created_at.substring(0,10) : '—'}</td>
+        <td class="d-flex gap-1 flex-wrap">
+          ${u.role === 'user'
+            ? `<button class="btn-sm-action btn-promote" onclick="setRole(${u.id},'admin')">Promote</button>`
+            : `<button class="btn-sm-action btn-demote"  onclick="setRole(${u.id},'user')">Demote</button>`}
+          <button class="btn-sm-action btn-remove" onclick="openDelUser(${u.id},'${u.name.replace(/'/g,"\\'")}')">Delete</button>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="7" class="text-center text-muted py-3">No users match your search.</td></tr>`;
+  }
+
+  window.filterUserTable = function() {
+    const q = document.getElementById('user-search').value.toLowerCase();
+    renderUserTable(q ? allUsersData.filter(u =>
+      u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    ) : allUsersData);
+  };
+
+  window.setRole = async function(userId, role) {
+    try {
+      const res  = await fetch(`/admin/users/${userId}/role`, { method:'PATCH', headers:authHeaders, body:JSON.stringify({role}) });
+      const data = await res.json();
+      toast(res.ok ? data.success : data.error, res.ok ? 'bg-success' : 'bg-danger');
+      if (res.ok) await loadUsers();
+    } catch (e) { toast('Role update failed', 'bg-danger'); }
+  };
+
+  window.openDelUser = function(id, name) {
+    pendingDeleteUserId = id;
+    document.getElementById('del-user-name').textContent = name;
+    delUserModal.show();
+  };
+
+  window.confirmDeleteUser = async function() {
+    delUserModal.hide();
+    try {
+      const res  = await fetch(`/admin/users/${pendingDeleteUserId}`, { method:'DELETE', headers:authHeaders });
+      const data = await res.json();
+      toast(res.ok ? data.success : data.error, res.ok ? 'bg-success' : 'bg-danger');
+      if (res.ok) { await loadUsers(); await loadStats(); }
+    } catch (e) { toast('Delete failed', 'bg-danger'); }
+  };
+
+  // ── NEWSLETTER ──────────────────────────────────────────────────────────
+  let allSubsData = [];
+
+  async function loadSubscribers() {
+    try {
+      const res  = await fetch('/admin/newsletter/subscribers', { headers: authHeaders });
+
+      // Debug: log raw response status
+      console.log('Subscribers fetch status:', res.status);
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast(err.error || `Failed (${res.status})`, 'bg-danger');
+        console.error('Subscribers error:', err);
+        return;
+      }
+
+      const data = await res.json();
+      console.log('Subscribers data:', data);
+
+      allSubsData = data.subscribers || [];
+      document.getElementById('ns-total').textContent       = data.total       ?? '—';
+      document.getElementById('ns-confirmed').textContent   = data.confirmed   ?? '—';
+      document.getElementById('ns-unconfirmed').textContent = data.unconfirmed ?? '—';
+
+      renderSubTable(allSubsData);
+    } catch(e) {
+      console.error('loadSubscribers error:', e);
+      toast('Could not load subscribers — check console', 'bg-danger');
+    }
+  }
+
+  function renderSubTable(subs) {
+    document.getElementById('sub-count').textContent = `${subs.length} subscriber${subs.length!==1?'s':''}`;
+    if (!subs.length) {
+      document.getElementById('subs-tbody').innerHTML =
+        `<tr><td colspan="4" class="text-center py-4">
+           <div style="color:var(--muted-txt)">
+             <i class="bi bi-envelope-slash" style="font-size:1.8rem;display:block;margin-bottom:8px"></i>
+             No subscribers yet. Share the site so people can subscribe!
+           </div>
+         </td></tr>`;
+      return;
+    }
+    document.getElementById('subs-tbody').innerHTML = subs.map(s => `
+      <tr>
+        <td class="text-muted">#${s.id}</td>
+        <td>${s.email}</td>
+        <td>${s.is_confirmed
+              ? '<span style="color:#2d6a4f"><i class="bi bi-check-circle-fill me-1"></i>Confirmed</span>'
+              : '<span style="color:var(--muted-txt)"><i class="bi bi-clock me-1"></i>Pending confirmation</span>'}</td>
+        <td style="font-size:.8rem;color:var(--muted-txt)">${s.created_at ? s.created_at.substring(0,10) : '—'}</td>
+      </tr>`).join('');
+  }
+
+  window.filterSubTable = function() {
+    const q = document.getElementById('sub-search').value.toLowerCase();
+    renderSubTable(q ? allSubsData.filter(s => s.email.toLowerCase().includes(q)) : allSubsData);
+  };
+
+  window.notifyNewCafes = async function() {
+    if (!confirm('Send a "new cafés" notification to all confirmed subscribers?')) return;
+    try {
+      const res  = await fetch('/admin/newsletter/notify', {
+        method: 'POST', headers: authHeaders,
+        body: JSON.stringify({ notify_new_cafes: true })
+      });
+      const data = await res.json();
+      toast(res.ok ? `✅ ${data.success}` : `❌ ${data.error}`,
+            res.ok ? 'bg-success' : 'bg-danger');
+    } catch(e) { toast('Failed to send notification', 'bg-danger'); }
+  };
+
+  window.sendCustomNewsletter = async function() {
+    const subject = document.getElementById('custom-subject').value.trim();
+    const body    = document.getElementById('custom-body').value.trim();
+    if (!subject || !body) { toast('Please fill in subject and message.', 'bg-warning text-dark'); return; }
+    if (!confirm(`Send "${subject}" to all confirmed subscribers?`)) return;
+    try {
+      const res  = await fetch('/admin/newsletter/notify', {
+        method: 'POST', headers: authHeaders,
+        body: JSON.stringify({ notify_new_cafes: false, subject, body })
+      });
+      const data = await res.json();
+      toast(res.ok ? `✅ ${data.success}` : `❌ ${data.error}`,
+            res.ok ? 'bg-success' : 'bg-danger');
+      if (res.ok) {
+        document.getElementById('custom-subject').value = '';
+        document.getElementById('custom-body').value = '';
+      }
+    } catch(e) { toast('Failed to send newsletter', 'bg-danger'); }
+  };
+
+  // ── LOGOUT ───────────────────────────────────────────────────────────────
+  window.logout = async function() {
+    try { await fetch('/auth/logout', { method:'DELETE', headers:authHeaders }); } catch(e) {}
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  };
+
+}); // end DOMContentLoaded
+
+// ── HELPERS (outside DOMContentLoaded — no auth needed) ─────────────────────
+function toast(msg, cls = 'bg-dark') {
+  const el = document.getElementById('toast');
+  el.className = `toast align-items-center border-0 text-white ${cls}`;
+  document.getElementById('toast-msg').textContent = msg;
+  bsToast.show();
+}
+
+function showOverlayError(msg) {
+  document.getElementById('loading-overlay').innerHTML = `
+    <div class="text-center px-4">
+      <div style="font-size:2.5rem;margin-bottom:12px">⚠️</div>
+      <p style="color:#9b3535;font-weight:500">${msg}</p>
+      <a href="/login" style="color:var(--caramel);font-size:.9rem">← Go to Login</a>
+    </div>`;
+}
+</script>
+</body>
+</html>

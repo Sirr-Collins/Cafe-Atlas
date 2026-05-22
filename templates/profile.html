@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile — Café Atlas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --cream:#f5f0e8;--warm:#ede5d4;--espresso:#2b1a0e;--roast:#5c3317;--caramel:#c0854a;--latte:#d4b896;--foam:#faf7f2;--muted-txt:#8a7060;--card-bg:#faf7f2;--body-bg:#f5f0e8;--text:#2b1a0e;--border:#ddd5c8; }
+    [data-theme="dark"] { --body-bg:#1a1008;--card-bg:#2a1c10;--foam:#2a1c10;--cream:#1a1008;--warm:#2f1f12;--text:#f0e8d8;--muted-txt:#a08878;--border:#4a3020; }
+    [data-theme="dark"] body { background:var(--body-bg);color:var(--text); }
+    [data-theme="dark"] .navbar { background:#0f0804!important; }
+    [data-theme="dark"] .profile-card, [data-theme="dark"] .cafe-card, [data-theme="dark"] .form-card { background:var(--card-bg); }
+    [data-theme="dark"] .form-control { background:#1a1008!important;border-color:#4a3020!important;color:var(--text)!important; }
+    [data-theme="dark"] .modal-content { background:var(--card-bg); }
+    [data-theme="dark"] .tab-btn { color:var(--muted-txt); }
+    [data-theme="dark"] .tab-btn.active { color:var(--text); }
+    * { transition:background-color .2s,color .2s,border-color .2s; }
+    body { background:var(--body-bg);color:var(--text);font-family:'DM Sans',sans-serif; }
+
+    /* NAVBAR */
+    .navbar { background:var(--espresso)!important; }
+    .navbar-brand { font-family:'Playfair Display',serif;font-size:1.4rem;color:#fff!important; }
+    .navbar-brand span { color:var(--caramel); }
+    .nav-btn { border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.85);border-radius:50px;padding:6px 18px;background:transparent;font-size:.88rem;transition:all .2s;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px; }
+    .nav-btn:hover { background:var(--caramel);border-color:var(--caramel);color:#fff; }
+    .theme-toggle { background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);border-radius:50px;padding:6px 12px;cursor:pointer;font-size:.88rem;transition:all .2s; }
+    .theme-toggle:hover { background:rgba(255,255,255,.2);color:#fff; }
+
+    /* PROFILE HEADER */
+    .profile-header { background:var(--espresso);color:#fff;padding:48px 0 80px;position:relative;overflow:hidden; }
+    .profile-header::before { content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 50%,rgba(192,133,74,.18) 0%,transparent 70%); }
+
+    /* AVATAR */
+    .avatar-wrap { position:relative;display:inline-block; }
+    .avatar { width:96px;height:96px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.3);background:var(--caramel);display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#fff;font-family:'Playfair Display',serif; }
+    .avatar img { width:100%;height:100%;border-radius:50%;object-fit:cover; }
+    .avatar-edit-btn { position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:var(--caramel);border:2px solid #fff;color:#fff;font-size:.75rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s; }
+    .avatar-edit-btn:hover { background:var(--roast); }
+
+    /* PROFILE CARD */
+    .profile-card { background:var(--card-bg);border-radius:20px;box-shadow:0 8px 40px rgba(43,26,14,.1);border:none;margin-top:-48px;position:relative;z-index:2; }
+
+    /* STAT PILLS */
+    .stat-pill { background:var(--warm);border-radius:12px;padding:12px 20px;text-align:center; }
+    .stat-pill .num { font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--espresso);line-height:1; }
+    .stat-pill .lbl { color:var(--muted-txt);font-size:.78rem;margin-top:2px; }
+    [data-theme="dark"] .stat-pill { background:var(--warm); }
+    [data-theme="dark"] .stat-pill .num { color:var(--text); }
+
+    /* TABS */
+    .tab-btn { background:transparent;border:none;padding:10px 20px;color:var(--muted-txt);border-bottom:2.5px solid transparent;font-weight:500;font-size:.92rem;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif; }
+    .tab-btn.active { color:var(--text);border-bottom-color:var(--caramel); }
+    .tab-border { border-bottom:1px solid var(--warm);margin-bottom:24px; }
+
+    /* FORM */
+    .form-card { background:var(--card-bg);border:none;border-radius:16px;box-shadow:0 4px 20px rgba(43,26,14,.08); }
+    .form-label { font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted-txt);font-weight:500; }
+    .form-control { background:var(--cream)!important;border-color:var(--border)!important;color:var(--text)!important;font-size:.92rem; }
+    .form-control:focus { border-color:var(--caramel)!important;box-shadow:0 0 0 3px rgba(192,133,74,.15)!important; }
+    .btn-espresso { background:var(--espresso);color:#fff;border:none;padding:10px 28px;border-radius:8px;font-weight:500;transition:background .2s;font-family:'DM Sans',sans-serif; }
+    .btn-espresso:hover { background:var(--roast);color:#fff; }
+    .btn-outline-caramel { background:transparent;color:var(--caramel);border:1.5px solid var(--caramel);padding:10px 28px;border-radius:8px;font-weight:500;transition:all .2s;font-family:'DM Sans',sans-serif; }
+    .btn-outline-caramel:hover { background:var(--caramel);color:#fff; }
+
+    /* CAFE MINI CARDS */
+    .cafe-mini { background:var(--card-bg);border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(43,26,14,.08);transition:transform .2s,box-shadow .2s;animation:fadeUp .4s ease both; }
+    .cafe-mini:hover { transform:translateY(-4px);box-shadow:0 10px 30px rgba(43,26,14,.12); }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .cafe-mini-img { height:120px;overflow:hidden; }
+    .cafe-mini-img img { width:100%;height:100%;object-fit:cover;transition:transform .3s; }
+    .cafe-mini:hover .cafe-mini-img img { transform:scale(1.05); }
+    .cafe-mini-body { padding:14px; }
+    .cafe-mini-name { font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:3px; }
+    .cafe-mini-loc  { color:var(--muted-txt);font-size:.78rem; }
+    .amenity-dot { width:8px;height:8px;border-radius:50%;display:inline-block; }
+    .amenity-dot.yes { background:#2d6a4f; }
+    .amenity-dot.no  { background:#e0d0d0; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align:center;padding:48px 20px;color:var(--muted-txt); }
+    .empty-icon { font-size:2.5rem;margin-bottom:12px;opacity:.5; }
+    .empty-state h5 { font-family:'Playfair Display',serif;color:var(--text); }
+
+    /* DANGER ZONE */
+    .danger-zone { border:1.5px solid #f0d0d0;border-radius:14px;padding:24px; }
+    .danger-zone h6 { color:#b94040;font-weight:600; }
+
+    /* MODAL */
+    .modal-content { background:var(--foam);border:none;border-radius:20px; }
+    .modal-title { font-family:'Playfair Display',serif; }
+
+    /* TOAST */
+    /* inherited from Bootstrap */
+
+    /* BACK TO TOP */
+    #back-to-top { position:fixed;bottom:32px;right:32px;z-index:500;background:var(--espresso);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(43,26,14,.25);transition:all .25s; }
+    #back-to-top:hover { background:var(--roast);transform:translateY(-2px); }
+    #back-to-top.visible { display:flex; }
+
+    /* PASSWORD STRENGTH */
+    .strength-bar { height:4px;border-radius:2px;margin-top:6px;transition:all .3s; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg py-2 px-4">
+  <a class="navbar-brand me-auto" href="/">☕ <span>Café</span>Atlas</a>
+  <div class="d-flex align-items-center gap-2">
+    <button class="theme-toggle" id="theme-toggle"><i class="bi bi-moon-stars" id="theme-icon"></i></button>
+    <a href="/" class="nav-btn"><i class="bi bi-grid me-1"></i>Browse</a>
+    <a href="#" onclick="logoutUser()" class="nav-btn"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+  </div>
+</nav>
+
+<!-- PROFILE HEADER -->
+<div class="profile-header">
+  <div class="container position-relative">
+    <div class="d-flex align-items-end gap-4">
+      <div class="avatar-wrap">
+        <div class="avatar" id="avatar-display">
+          <img id="avatar-img" src="" alt="" style="display:none" onerror="this.style.display='none';document.getElementById('avatar-initial').style.display='block'"/>
+          <span id="avatar-initial">?</span>
+        </div>
+        <div class="avatar-edit-btn" onclick="document.getElementById('avatar-section').scrollIntoView({behavior:'smooth'})" title="Update avatar">
+          <i class="bi bi-pencil"></i>
+        </div>
+      </div>
+      <div class="pb-1">
+        <h1 class="mb-1" style="font-family:'Playfair Display',serif;font-size:1.8rem" id="header-name">Loading…</h1>
+        <p class="mb-0 opacity-75" style="font-size:.9rem" id="header-meta"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="container py-4">
+  <div class="row g-4">
+
+    <!-- LEFT — Stats + Edit Form -->
+    <div class="col-lg-4">
+
+      <!-- Stats -->
+      <div class="row g-2 mb-4">
+        <div class="col-4">
+          <div class="stat-pill">
+            <div class="num" id="stat-cafes">—</div>
+            <div class="lbl">Cafés Added</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="stat-pill">
+            <div class="num" id="stat-role">—</div>
+            <div class="lbl">Role</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="stat-pill">
+            <div class="num" id="stat-confirmed">—</div>
+            <div class="lbl">Status</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABS — Edit Profile / Change Password / Danger Zone -->
+      <div class="tab-border d-flex">
+        <button class="tab-btn active" onclick="showTab('edit',this)">Edit Profile</button>
+        <button class="tab-btn" onclick="showTab('password',this)">Password</button>
+        <button class="tab-btn" onclick="showTab('danger',this)">⚠</button>
+      </div>
+
+      <!-- EDIT PROFILE TAB -->
+      <div id="tab-edit">
+        <div class="form-card p-4">
+          <div class="mb-3">
+            <label class="form-label">Display Name</label>
+            <input id="f-name" type="text" class="form-control" placeholder="Your name"/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Bio</label>
+            <textarea id="f-bio" class="form-control" rows="3" placeholder="Tell the community a little about yourself…" style="resize:none"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Location</label>
+            <input id="f-location" type="text" class="form-control" placeholder="e.g. Lagos, Nigeria"/>
+          </div>
+          <div class="mb-3" id="avatar-section">
+            <label class="form-label">Avatar URL</label>
+            <input id="f-avatar" type="text" class="form-control" placeholder="https://…" oninput="previewAvatar(this.value)"/>
+            <small class="text-muted">Paste any image URL — or use a <a href="https://gravatar.com" target="_blank" style="color:var(--caramel)">Gravatar</a> link</small>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Website</label>
+            <input id="f-website" type="text" class="form-control" placeholder="https://yoursite.com"/>
+          </div>
+          <button class="btn-espresso" onclick="saveProfile()">
+            <i class="bi bi-check-lg me-1"></i>Save Changes
+          </button>
+        </div>
+      </div>
+
+      <!-- CHANGE PASSWORD TAB -->
+      <div id="tab-password" style="display:none">
+        <div class="form-card p-4">
+          <div class="mb-3">
+            <label class="form-label">Current Password</label>
+            <input id="p-current" type="password" class="form-control" placeholder="Your current password"/>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">New Password</label>
+            <input id="p-new" type="password" class="form-control" placeholder="Min. 8 characters" oninput="checkStrength(this.value)"/>
+            <div class="strength-bar" id="strength-bar" style="background:#ddd;width:0%"></div>
+            <small id="strength-label" class="text-muted"></small>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Confirm New Password</label>
+            <input id="p-confirm" type="password" class="form-control" placeholder="Repeat new password"/>
+          </div>
+          <button class="btn-espresso" onclick="changePassword()">
+            <i class="bi bi-shield-check me-1"></i>Update Password
+          </button>
+        </div>
+      </div>
+
+      <!-- DANGER ZONE TAB -->
+      <div id="tab-danger" style="display:none">
+        <div class="danger-zone">
+          <h6><i class="bi bi-exclamation-triangle me-1"></i>Danger Zone</h6>
+          <p class="text-muted" style="font-size:.88rem">These actions are permanent and cannot be undone.</p>
+          <button class="btn btn-outline-danger btn-sm w-100" onclick="document.getElementById('deleteAccountModal').querySelector('[data-bs-toggle]') || new bootstrap.Modal(document.getElementById('deleteAccountModal')).show()">
+            <i class="bi bi-trash3 me-1"></i>Delete My Account
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /col-lg-4 -->
+
+    <!-- RIGHT — Added Cafés -->
+    <div class="col-lg-8">
+      <div class="d-flex justify-content-between align-items-baseline mb-3">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.4rem">Cafés I've Added</h3>
+        <span class="badge rounded-pill px-3 py-2" style="background:var(--warm);color:var(--muted-txt);font-size:.78rem;font-weight:400" id="cafe-count-badge">—</span>
+      </div>
+      <div id="my-cafes" class="row g-3">
+        <!-- Skeleton -->
+        <div class="col-sm-6"><div style="background:var(--warm);border-radius:14px;height:180px;animation:shimmer 1.5s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--warm) 25%,var(--cream) 50%,var(--warm) 75%)"></div></div>
+        <div class="col-sm-6"><div style="background:var(--warm);border-radius:14px;height:180px;animation:shimmer 1.5s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--warm) 25%,var(--cream) 50%,var(--warm) 75%)"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /row -->
+</main>
+
+<!-- DELETE ACCOUNT MODAL -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-2">
+      <div class="modal-header"><h5 class="modal-title">Delete your account?</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <p class="text-muted" style="font-size:.9rem">This will permanently delete your account and all your data. Your added cafés will remain but will show as "Original data".</p>
+        <p class="text-muted" style="font-size:.9rem">Type <strong>DELETE</strong> to confirm:</p>
+        <input id="delete-confirm-input" type="text" class="form-control" placeholder="Type DELETE"/>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger px-4" onclick="deleteAccount()">Delete My Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1100">
+  <div id="liveToast" class="toast align-items-center border-0 text-white bg-dark">
+    <div class="d-flex">
+      <div class="toast-body fw-medium" id="toast-msg"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<!-- BACK TO TOP -->
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="bi bi-arrow-up"></i></button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── DARK MODE ───────────────────────────────────────────────────────────────
+(function() { document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light'); })();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('theme-toggle');
+  const icon   = document.getElementById('theme-icon');
+  function applyTheme(t) { document.documentElement.setAttribute('data-theme',t); icon.className=t==='dark'?'bi bi-sun':'bi bi-moon-stars'; localStorage.setItem('theme',t); }
+  applyTheme(localStorage.getItem('theme')||'light');
+  toggle.addEventListener('click',()=>applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'));
+});
+
+// ── BACK TO TOP ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll',()=>document.getElementById('back-to-top').classList.toggle('visible',window.scrollY>300));
+
+// ── BOOTSTRAP ───────────────────────────────────────────────────────────────
+const bsToast       = new bootstrap.Toast(document.getElementById('liveToast'),{delay:3500});
+const deleteAccModal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+
+// ── AUTH CHECK ───────────────────────────────────────────────────────────────
+const token = localStorage.getItem('token');
+const user  = JSON.parse(localStorage.getItem('user')||'{}');
+if (!token) { window.location.href = '/login'; }
+
+const authHeaders = { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` };
+
+// ── LOAD PROFILE ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res  = await fetch('/api/profile', { headers: authHeaders });
+    const data = await res.json();
+    if (!res.ok) { showToast('Could not load profile', 'bg-danger'); return; }
+
+    const u = data.user;
+
+    // Header
+    document.getElementById('header-name').textContent = u.name;
+    document.getElementById('header-meta').innerHTML   =
+      `${u.location ? `<i class="bi bi-geo-alt me-1"></i>${u.location} &nbsp;·&nbsp; ` : ''}` +
+      `<i class="bi bi-calendar3 me-1"></i>Joined ${u.created_at ? u.created_at.substring(0,10) : '—'}`;
+
+    // Avatar
+    updateAvatarDisplay(u.name, u.avatar_url);
+
+    // Stats
+    document.getElementById('stat-cafes').textContent     = data.cafes.length;
+    document.getElementById('stat-role').textContent      = u.role;
+    document.getElementById('stat-confirmed').textContent = u.is_confirmed ? '✅' : '⚠️';
+
+    // Pre-fill form
+    document.getElementById('f-name').value    = u.name     || '';
+    document.getElementById('f-bio').value     = u.bio      || '';
+    document.getElementById('f-location').value= u.location || '';
+    document.getElementById('f-avatar').value  = u.avatar_url || '';
+    document.getElementById('f-website').value = u.website  || '';
+
+    // Render cafés
+    renderMyCafes(data.cafes);
+
+  } catch (e) {
+    showToast('Failed to load profile', 'bg-danger');
+    console.error(e);
+  }
+});
+
+// ── AVATAR ───────────────────────────────────────────────────────────────────
+function updateAvatarDisplay(name, url) {
+  const img     = document.getElementById('avatar-img');
+  const initial = document.getElementById('avatar-initial');
+  if (url) {
+    img.src = url;
+    img.style.display   = 'block';
+    initial.style.display = 'none';
+  } else {
+    img.style.display   = 'none';
+    initial.style.display = 'block';
+    initial.textContent = name ? name[0].toUpperCase() : '?';
+  }
+}
+
+function previewAvatar(url) {
+  updateAvatarDisplay(document.getElementById('f-name').value, url);
+}
+
+// ── RENDER MY CAFÉS ──────────────────────────────────────────────────────────
+const DEFAULT_IMG = 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400';
+
+function renderMyCafes(cafes) {
+  const grid  = document.getElementById('my-cafes');
+  const badge = document.getElementById('cafe-count-badge');
+  badge.textContent = `${cafes.length} café${cafes.length !== 1 ? 's' : ''}`;
+
+  if (!cafes.length) {
+    grid.innerHTML = `
+      <div class="col-12">
+        <div class="empty-state">
+          <div class="empty-icon">☕</div>
+          <h5 class="mb-2">No cafés added yet</h5>
+          <p>Head back to the <a href="/" style="color:var(--caramel)">main page</a> and add the first one!</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = cafes.map((c,i) => `
+    <div class="col-sm-6" style="animation-delay:${i*.06}s">
+      <div class="cafe-mini">
+        <div class="cafe-mini-img">
+          <img src="${c.img_url || DEFAULT_IMG}" alt="${c.name}" loading="lazy"
+               onerror="this.src='${DEFAULT_IMG}'"/>
+        </div>
+        <div class="cafe-mini-body">
+          <div class="cafe-mini-name">${c.name}</div>
+          <div class="cafe-mini-loc mb-2"><i class="bi bi-geo-alt me-1"></i>${c.location}</div>
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            ${dot('Wi‑Fi',   c.has_wifi)}
+            ${dot('Sockets', c.has_sockets)}
+            ${dot('Toilet',  c.has_toilet)}
+            ${dot('Calls',   c.can_take_calls)}
+            ${c.coffee_price ? `<span class="ms-auto" style="font-size:.78rem;color:var(--caramel);font-weight:600">${c.coffee_price}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function dot(label, ok) {
+  return `<span style="font-size:.75rem;color:var(--muted-txt);display:flex;align-items:center;gap:3px">
+    <span class="amenity-dot ${ok?'yes':'no'}"></span>${label}
+  </span>`;
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(name, el) {
+  ['edit','password','danger'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── SAVE PROFILE ─────────────────────────────────────────────────────────────
+async function saveProfile() {
+  const payload = {
+    name:       document.getElementById('f-name').value.trim(),
+    bio:        document.getElementById('f-bio').value.trim(),
+    location:   document.getElementById('f-location').value.trim(),
+    avatar_url: document.getElementById('f-avatar').value.trim(),
+    website:    document.getElementById('f-website').value.trim(),
+  };
+
+  if (!payload.name) { showToast('Name cannot be empty.', 'bg-danger'); return; }
+
+  try {
+    const res  = await fetch('/api/profile', { method:'PATCH', headers:authHeaders, body:JSON.stringify(payload) });
+    const data = await res.json();
+
+    if (!res.ok) { showToast(data.error, 'bg-danger'); return; }
+
+    // Update localStorage so navbar reflects new name immediately
+    const updatedUser = { ...user, ...data.user };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+
+    // Refresh header display
+    document.getElementById('header-name').textContent = data.user.name;
+    updateAvatarDisplay(data.user.name, data.user.avatar_url);
+
+    showToast('✅ Profile updated!', 'bg-success');
+
+  } catch (e) { showToast('Could not save profile', 'bg-danger'); }
+}
+
+// ── CHANGE PASSWORD ───────────────────────────────────────────────────────────
+async function changePassword() {
+  const current = document.getElementById('p-current').value;
+  const newPw   = document.getElementById('p-new').value;
+  const confirm = document.getElementById('p-confirm').value;
+
+  if (!current || !newPw || !confirm) { showToast('All fields are required.', 'bg-danger'); return; }
+  if (newPw !== confirm)              { showToast('New passwords do not match.', 'bg-danger'); return; }
+  if (newPw.length < 8)              { showToast('Password must be at least 8 characters.', 'bg-danger'); return; }
+
+  try {
+    const res  = await fetch('/api/profile/password', {
+      method:'PATCH', headers:authHeaders,
+      body: JSON.stringify({ current_password:current, new_password:newPw })
+    });
+    const data = await res.json();
+
+    if (!res.ok) { showToast(data.error, 'bg-danger'); return; }
+
+    showToast('✅ Password updated!', 'bg-success');
+    document.getElementById('p-current').value = '';
+    document.getElementById('p-new').value     = '';
+    document.getElementById('p-confirm').value = '';
+    document.getElementById('strength-bar').style.width = '0%';
+    document.getElementById('strength-label').textContent = '';
+
+  } catch (e) { showToast('Could not update password', 'bg-danger'); }
+}
+
+// ── PASSWORD STRENGTH ─────────────────────────────────────────────────────────
+function checkStrength(pw) {
+  const bar   = document.getElementById('strength-bar');
+  const label = document.getElementById('strength-label');
+  if (!pw) { bar.style.width='0%'; label.textContent=''; return; }
+  let score = 0;
+  if (pw.length >= 8)           score++;
+  if (/[A-Z]/.test(pw))         score++;
+  if (/[0-9]/.test(pw))         score++;
+  if (/[^A-Za-z0-9]/.test(pw))  score++;
+  const map = { 1:['25%','#e74c3c','Weak'], 2:['50%','#e67e22','Fair'], 3:['75%','#f1c40f','Good'], 4:['100%','#2ecc71','Strong'] };
+  const [w,c,t] = map[score] || ['0%','#ddd',''];
+  bar.style.width=w; bar.style.background=c;
+  label.textContent=t; label.style.color=c;
+}
+
+// ── DELETE ACCOUNT ────────────────────────────────────────────────────────────
+function deleteAccount() {
+  const input = document.getElementById('delete-confirm-input').value.trim();
+  if (input !== 'DELETE') { showToast('Type DELETE to confirm.', 'bg-warning text-dark'); return; }
+  // For now show a message — wire to DELETE /api/profile route when ready
+  deleteAccModal.hide();
+  showToast('Account deletion is disabled in demo mode.', 'bg-secondary');
+}
+
+// ── LOGOUT ────────────────────────────────────────────────────────────────────
+async function logoutUser() {
+  try { await fetch('/auth/logout', { method:'DELETE', headers:authHeaders }); } catch(e) {}
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.location.href = '/login';
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg, cls='bg-dark') {
+  const el = document.getElementById('liveToast');
+  el.className = `toast align-items-center border-0 text-white ${cls}`;
+  document.getElementById('toast-msg').textContent = msg;
+  bsToast.show();
+}
+</script>
+</body>
+</html>

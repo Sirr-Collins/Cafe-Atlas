@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Café Atlas — Find cafés with great WiFi and coffee for remote workers."/>
+  <title>Café Atlas — Find Your Perfect Work Spot</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream:#f5f0e8; --warm:#ede5d4; --espresso:#2b1a0e; --roast:#5c3317;
+      --caramel:#c0854a; --latte:#d4b896; --foam:#faf7f2; --muted-txt:#8a7060;
+      --card-bg:#faf7f2; --body-bg:#f5f0e8; --text:#2b1a0e; --border:#ddd5c8;
+    }
+    [data-theme="dark"] {
+      --body-bg:#1a1008; --card-bg:#2a1c10; --foam:#2a1c10; --cream:#1a1008;
+      --warm:#2f1f12; --text:#f0e8d8; --muted-txt:#a08878; --border:#4a3020;
+    }
+    [data-theme="dark"] body        { background:var(--body-bg); color:var(--text); }
+    [data-theme="dark"] .navbar     { background:#0f0804!important; }
+    [data-theme="dark"] .cafe-card  { background:var(--card-bg); box-shadow:0 4px 20px rgba(0,0,0,.4); }
+    [data-theme="dark"] .form-card  { background:var(--card-bg); }
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .form-select { background:#1a1008!important; border-color:#4a3020!important; color:var(--text)!important; }
+    [data-theme="dark"] .modal-content  { background:var(--card-bg); }
+    [data-theme="dark"] .filter-chip   { background:#2f1f12; border-color:#4a3020; color:var(--latte); }
+    [data-theme="dark"] .confirm-banner { background:#3a2800; border-color:#856404; color:#f0c674; }
+    [data-theme="dark"] .login-prompt  { background:var(--card-bg); border-color:#4a3020; }
+    [data-theme="dark"] footer          { background:#0f0804!important; }
+    [data-theme="dark"] .footer-bottom  { background:#080402!important; }
+    [data-theme="dark"] .sort-select    { background:#2f1f12; border-color:#4a3020; color:var(--latte); }
+    [data-theme="dark"] .skeleton-img,
+    [data-theme="dark"] .skeleton-line  { background:linear-gradient(90deg,#2f1f12 25%,#3a2510 50%,#2f1f12 75%); background-size:200% 100%; }
+    * { transition:background-color .2s,color .2s,border-color .2s; }
+    body { background:var(--body-bg); color:var(--text); font-family:'DM Sans',sans-serif; }
+
+    /* NAVBAR */
+    .navbar { background:var(--espresso)!important; }
+    .navbar-brand { font-family:'Playfair Display',serif; font-size:1.4rem; color:#fff!important; }
+    .navbar-brand span { color:var(--caramel); }
+    .nav-btn { border:1.5px solid rgba(255,255,255,.25); color:rgba(255,255,255,.85); border-radius:50px; padding:6px 18px; background:transparent; font-size:.88rem; transition:all .2s; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+    .nav-btn:hover,.nav-btn.active { background:var(--caramel); border-color:var(--caramel); color:#fff; }
+    .nav-btn-solid { background:var(--caramel); border-color:var(--caramel); color:#fff; }
+    .nav-btn-solid:hover { background:var(--roast); border-color:var(--roast); color:#fff; }
+    .theme-toggle { background:rgba(255,255,255,.1); border:1.5px solid rgba(255,255,255,.2); color:rgba(255,255,255,.8); border-radius:50px; padding:6px 12px; cursor:pointer; font-size:.88rem; transition:all .2s; }
+    .theme-toggle:hover { background:rgba(255,255,255,.2); color:#fff; }
+
+    /* HERO */
+    .hero { background:var(--espresso); color:#fff; padding:80px 0 88px; position:relative; overflow:hidden; }
+    .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 55% 80% at 15% 50%,rgba(192,133,74,.2) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 85% 25%,rgba(192,133,74,.12) 0%,transparent 70%); }
+    .hero-eyebrow { font-size:.78rem; letter-spacing:.18em; text-transform:uppercase; color:var(--caramel); }
+    .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2.2rem,5vw,3.4rem); line-height:1.12; }
+    .hero h1 em { color:var(--caramel); font-style:italic; }
+    .hero .lead { color:var(--latte); max-width:440px; }
+    .search-pill { background:var(--foam); border-radius:50px; overflow:hidden; max-width:440px; box-shadow:0 6px 28px rgba(0,0,0,.28); display:flex; }
+    .search-pill input { flex:1; border:none; background:transparent; padding:13px 20px; font-size:.95rem; color:var(--espresso); outline:none; }
+    .search-pill input::placeholder { color:var(--muted-txt); }
+    .search-pill .btn-search { background:var(--caramel); border:none; color:#fff; padding:13px 24px; font-weight:500; transition:background .2s; cursor:pointer; }
+    .search-pill .btn-search:hover { background:var(--roast); }
+
+    /* STATS */
+    .stats-strip { background:var(--caramel); color:#fff; padding:16px 0; font-size:.88rem; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:1.6rem; display:block; line-height:1; }
+
+    /* FILTERS + SORT */
+    .filter-chip { border:1.5px solid #d5ccc2; background:var(--warm); color:var(--roast); border-radius:50px; padding:6px 16px; font-size:.84rem; cursor:pointer; transition:all .2s; }
+    .filter-chip:hover,.filter-chip.on { background:var(--espresso); color:#fff; border-color:var(--espresso); }
+    .sort-select { background:var(--warm); border:1.5px solid var(--border); color:var(--roast); border-radius:50px; padding:6px 14px; font-size:.84rem; cursor:pointer; font-family:'DM Sans',sans-serif; outline:none; }
+    .sort-select:focus { border-color:var(--caramel); }
+
+    /* SKELETON */
+    .skeleton-card { background:var(--foam); border-radius:18px; overflow:hidden; box-shadow:0 4px 20px rgba(43,26,14,.09); }
+    .skeleton-img { height:190px; background:linear-gradient(90deg,var(--warm) 25%,var(--cream) 50%,var(--warm) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+    .skeleton-line { height:14px; border-radius:6px; margin:8px 0; background:linear-gradient(90deg,var(--warm) 25%,var(--cream) 50%,var(--warm) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+    .skeleton-line.short { width:60%; }
+    .skeleton-line.xshort { width:40%; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* CARDS */
+    .cafe-card { background:var(--card-bg); border:none; border-radius:18px; overflow:hidden; box-shadow:0 4px 20px rgba(43,26,14,.09); transition:transform .25s,box-shadow .25s; animation:fadeUp .5s ease both; }
+    .cafe-card:hover { transform:translateY(-6px); box-shadow:0 14px 44px rgba(43,26,14,.15); }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+    .card-img-wrap { position:relative; height:190px; overflow:hidden; }
+    .card-img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
+    .cafe-card:hover .card-img-wrap img { transform:scale(1.05); }
+    .price-badge { position:absolute; top:10px; right:10px; background:var(--espresso); color:var(--caramel); padding:3px 12px; border-radius:50px; font-size:.8rem; font-weight:500; }
+    .card-title-text { font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:4px; }
+    .card-location { color:var(--muted-txt); font-size:.82rem; }
+    .amenity { display:inline-flex; align-items:center; gap:4px; font-size:.76rem; font-weight:500; padding:3px 10px; border-radius:50px; }
+    .amenity.yes { background:#e8f5ee; color:#3a6b4a; }
+    .amenity.no  { background:#f5e8e8; color:#9b3535; }
+    .btn-map { background:transparent; border:1.5px solid var(--border); color:var(--roast); border-radius:8px; font-size:.84rem; font-weight:500; padding:8px 0; transition:all .2s; width:100%; }
+    .btn-map:hover { border-color:var(--caramel); color:var(--caramel); }
+    .btn-del { background:transparent; border:1.5px solid #f0d0d0; color:#b94040; border-radius:8px; padding:8px 14px; transition:all .2s; }
+    .btn-del:hover { background:#b94040; color:#fff; border-color:#b94040; }
+    .btn-edit { background:transparent; border:1.5px solid #d5e8f0; color:#2a6b8a; border-radius:8px; padding:8px 14px; transition:all .2s; }
+    .btn-edit:hover { background:#2a6b8a; color:#fff; border-color:#2a6b8a; }
+
+    /* FORMS */
+    #add-section { display:none; }
+    .form-card { background:var(--foam); border:none; border-radius:20px; box-shadow:0 4px 24px rgba(43,26,14,.09); }
+    .form-label { font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted-txt); font-weight:500; }
+    .form-control,.form-select { background:var(--cream)!important; border-color:var(--border)!important; color:var(--text)!important; font-size:.92rem; }
+    .form-control:focus,.form-select:focus { border-color:var(--caramel)!important; box-shadow:0 0 0 3px rgba(192,133,74,.15)!important; }
+    .form-check-input:checked { background-color:var(--caramel); border-color:var(--caramel); }
+    .btn-espresso { background:var(--espresso); color:#fff; border:none; padding:11px 32px; border-radius:8px; font-weight:500; transition:background .2s; }
+    .btn-espresso:hover { background:var(--roast); color:#fff; }
+    .section-title { font-family:'Playfair Display',serif; font-size:1.7rem; }
+    .modal-content { background:var(--foam); border:none; border-radius:20px; }
+    .modal-header { border-bottom:1px solid var(--warm); }
+    .modal-footer { border-top:1px solid var(--warm); }
+    .modal-title  { font-family:'Playfair Display',serif; }
+
+    /* USER BADGE */
+    .user-badge { background:rgba(255,255,255,.12); color:#fff; border-radius:50px; padding:5px 14px; font-size:.84rem; display:flex; align-items:center; gap:7px; }
+    .user-badge .role-dot { width:8px; height:8px; border-radius:50%; background:var(--caramel); display:inline-block; }
+    .user-badge .role-dot.admin { background:#a6e3a1; }
+
+    /* CONFIRM BANNER */
+    .confirm-banner { background:#fff3cd; border:1px solid #ffc107; border-radius:10px; padding:12px 18px; font-size:.88rem; margin-bottom:20px; display:none; }
+
+    /* FAB */
+    .fab { position:fixed; bottom:32px; right:32px; z-index:500; background:var(--caramel); color:#fff; border:none; border-radius:50px; padding:14px 24px; font-size:.95rem; font-weight:600; box-shadow:0 6px 24px rgba(192,133,74,.45); cursor:pointer; transition:all .25s; display:none; align-items:center; gap:8px; font-family:'DM Sans',sans-serif; }
+    .fab:hover { background:var(--roast); transform:translateY(-3px); box-shadow:0 10px 32px rgba(43,26,14,.25); }
+
+    /* BACK TO TOP */
+    #back-to-top { position:fixed; bottom:32px; left:32px; z-index:500; background:var(--espresso); color:#fff; border:none; border-radius:50%; width:44px; height:44px; font-size:1.1rem; cursor:pointer; display:none; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(43,26,14,.25); transition:all .25s; }
+    #back-to-top:hover { background:var(--roast); transform:translateY(-2px); }
+    #back-to-top.visible { display:flex; }
+
+    /* LOGIN PROMPT */
+    .login-prompt { background:var(--foam); border-radius:16px; border:2px dashed var(--latte); padding:32px; text-align:center; margin-top:8px; display:none; }
+    .login-prompt h5 { font-family:'Playfair Display',serif; color:var(--text); margin-bottom:8px; }
+    .login-prompt p  { color:var(--muted-txt); font-size:.9rem; margin-bottom:16px; }
+    .btn-prompt-login { background:var(--espresso); color:#fff; border:none; padding:10px 24px; border-radius:8px; font-weight:500; text-decoration:none; margin:0 4px; font-size:.9rem; transition:background .2s; }
+    .btn-prompt-login:hover { background:var(--roast); color:#fff; }
+    .btn-prompt-reg { background:transparent; color:var(--caramel); border:1.5px solid var(--caramel); padding:10px 24px; border-radius:8px; font-weight:500; text-decoration:none; margin:0 4px; font-size:.9rem; transition:all .2s; }
+    .btn-prompt-reg:hover { background:var(--caramel); color:#fff; }
+
+    /* NO RESULTS */
+    .no-results { text-align:center; padding:60px 20px; color:var(--muted-txt); }
+    .no-results-icon { font-size:3rem; margin-bottom:12px; opacity:.5; }
+    .no-results h4 { font-family:'Playfair Display',serif; color:var(--text); font-size:1.3rem; }
+
+    /* FOOTER */
+    footer { background:var(--espresso); color:var(--latte); padding:56px 0 0; }
+    .footer-brand { font-family:'Playfair Display',serif; font-size:1.5rem; color:#fff; margin-bottom:10px; }
+    .footer-brand span { color:var(--caramel); }
+    .footer-tagline { color:var(--muted-txt); font-size:.88rem; max-width:260px; line-height:1.6; }
+    .footer-heading { color:var(--caramel); font-size:.78rem; font-weight:600; text-transform:uppercase; letter-spacing:.12em; margin-bottom:14px; }
+    .footer-link { display:block; color:var(--latte); text-decoration:none; font-size:.88rem; margin-bottom:8px; transition:color .2s; }
+    .footer-link:hover { color:#fff; }
+    .footer-divider { border-color:rgba(255,255,255,.08); margin:32px 0 0; }
+    .footer-bottom { background:rgba(0,0,0,.25); padding:16px 0; font-size:.82rem; color:var(--muted-txt); }
+    .social-btn { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.08); color:var(--latte); text-decoration:none; transition:all .2s; font-size:1rem; }
+    .social-btn:hover { background:var(--caramel); color:#fff; }
+    .newsletter-pill { display:flex; background:rgba(255,255,255,.08); border-radius:50px; overflow:hidden; }
+    .newsletter-pill input { flex:1; background:transparent; border:none; padding:10px 16px; color:#fff; outline:none; font-size:.88rem; }
+    .newsletter-pill input::placeholder { color:var(--muted-txt); }
+    .newsletter-pill button { background:var(--caramel); border:none; color:#fff; padding:10px 18px; font-size:.84rem; cursor:pointer; transition:background .2s; font-family:'DM Sans',sans-serif; font-weight:500; }
+    .newsletter-pill button:hover { background:var(--roast); }
+
+    /* ── PAGINATION ─────────────────────────────────────────────────── */
+    .page-btn {
+      background: var(--foam); border: 1.5px solid var(--border);
+      color: var(--roast); border-radius: 8px;
+      padding: 8px 14px; font-size: .88rem; font-weight: 500;
+      cursor: pointer; transition: all .2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .page-btn:hover:not(:disabled) { border-color: var(--caramel); color: var(--caramel); }
+    .page-btn.active { background: var(--espresso); color: #fff; border-color: var(--espresso); }
+    .page-btn:disabled, .page-btn.disabled { opacity: .4; cursor: not-allowed; }
+    .page-ellipsis { color: var(--muted-txt); padding: 0 4px; font-size: .88rem; }
+    [data-theme="dark"] .page-btn { background: var(--card-bg); border-color: var(--border); color: var(--latte); }
+    [data-theme="dark"] .page-btn.active { background: var(--caramel); border-color: var(--caramel); color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg py-2 px-4">
+  <a class="navbar-brand me-auto" href="/">☕ <span>Café</span>Atlas</a>
+  <div class="d-flex align-items-center gap-2">
+    <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+      <i class="bi bi-moon-stars" id="theme-icon"></i>
+    </button>
+    <div class="d-flex align-items-center gap-2" id="nav-auth-area"></div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container position-relative">
+    <p class="hero-eyebrow mb-2">Find Your Perfect Work Spot</p>
+    <h1 class="mb-3">Great Coffee.<br><em>Better Wi‑Fi.</em></h1>
+    <p class="lead mb-4">Discover cafés that welcome remote workers — filtered by the amenities that matter to you.</p>
+    <div class="search-pill">
+      <input id="hero-search" type="text" placeholder="Search by location or name…"/>
+      <button class="btn-search" onclick="handleSearch()"><i class="bi bi-search"></i> Search</button>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="container">
+    <div class="row text-center g-0">
+      <div class="col-4"><span class="stat-num" id="stat-total">—</span>Cafés Listed</div>
+      <div class="col-4"><span class="stat-num" id="stat-wifi">—</span>With Wi‑Fi</div>
+      <div class="col-4"><span class="stat-num" id="stat-sockets">—</span>With Sockets</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM BANNER -->
+<div class="container mt-3">
+  <div class="confirm-banner" id="confirm-banner">
+    <i class="bi bi-envelope-exclamation me-2"></i>
+    Your email is not confirmed yet. Some features are restricted.
+    <a href="#" onclick="resendConfirmation()" class="ms-2 fw-bold">Resend confirmation email</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="container py-4">
+
+  <!-- BROWSE -->
+  <div id="browse-section">
+    <!-- Filters + Sort -->
+    <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-4">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <span class="text-muted" style="font-size:.85rem">Filter:</span>
+        <button class="filter-chip on" onclick="setFilter('all',this)">All</button>
+        <button class="filter-chip" onclick="setFilter('wifi',this)"><i class="bi bi-wifi"></i> Wi‑Fi</button>
+        <button class="filter-chip" onclick="setFilter('sockets',this)"><i class="bi bi-plug"></i> Sockets</button>
+        <button class="filter-chip" onclick="setFilter('toilet',this)"><i class="bi bi-door-open"></i> Toilet</button>
+        <button class="filter-chip" onclick="setFilter('calls',this)"><i class="bi bi-telephone"></i> Calls OK</button>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-muted" style="font-size:.85rem">Sort:</span>
+        <select class="sort-select" id="sort-select" onchange="applyFilter()">
+          <option value="default">Default</option>
+          <option value="name-asc">Name A→Z</option>
+          <option value="name-desc">Name Z→A</option>
+          <option value="price-asc">Price Low→High</option>
+          <option value="price-desc">Price High→Low</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Section head -->
+    <div class="d-flex justify-content-between align-items-baseline mb-3">
+      <h2 class="section-title mb-0">All Cafés</h2>
+      <span class="badge rounded-pill px-3 py-2" style="background:var(--warm);color:var(--muted-txt);font-size:.8rem;font-weight:400" id="count-badge">Loading…</span>
+    </div>
+
+    <!-- Grid — skeleton while loading -->
+    <div id="cafe-grid" class="row g-4">
+      <div class="col-sm-6 col-lg-4"><div class="skeleton-card"><div class="skeleton-img"></div><div class="p-3"><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line xshort"></div></div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="skeleton-card"><div class="skeleton-img"></div><div class="p-3"><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line xshort"></div></div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="skeleton-card"><div class="skeleton-img"></div><div class="p-3"><div class="skeleton-line"></div><div class="skeleton-line short"></div><div class="skeleton-line xshort"></div></div></div></div>
+    </div>
+  </div>
+
+  <!-- ADD FORM -->
+  <div id="add-section">
+    <div class="form-card card p-4 p-md-5 mx-auto" style="max-width:700px">
+      <h2 class="section-title mb-1">Add a New Café</h2>
+      <p class="text-muted mb-4" style="font-size:.9rem">Saved directly to the database.</p>
+      <div class="row g-3">
+        <div class="col-12"><label class="form-label">Café Name *</label><input id="f-name" type="text" class="form-control" placeholder="e.g. The Daily Grind"/></div>
+        <div class="col-md-6"><label class="form-label">Location *</label><input id="f-location" type="text" class="form-control" placeholder="e.g. Peckham"/></div>
+        <div class="col-md-3"><label class="form-label">Coffee Price</label><input id="f-price" type="text" class="form-control" placeholder="£2.80"/></div>
+        <div class="col-md-3"><label class="form-label">Seats</label><input id="f-seats" type="text" class="form-control" placeholder="20-30"/></div>
+        <div class="col-12"><label class="form-label">Google Maps URL *</label><input id="f-map" type="text" class="form-control" placeholder="https://maps.google.com/…"/></div>
+        <div class="col-12"><label class="form-label">Image URL <span class="text-muted fw-normal">(optional)</span></label><input id="f-img" type="text" class="form-control" placeholder="https://…"/></div>
+        <div class="col-12">
+          <label class="form-label d-block mb-2">Amenities</label>
+          <div class="d-flex flex-wrap gap-4">
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="f-wifi" checked/><label class="form-check-label" for="f-wifi"><i class="bi bi-wifi"></i> Wi‑Fi</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="f-sockets"/><label class="form-check-label" for="f-sockets"><i class="bi bi-plug"></i> Sockets</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="f-toilet"/><label class="form-check-label" for="f-toilet"><i class="bi bi-door-open"></i> Toilet</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="f-calls"/><label class="form-check-label" for="f-calls"><i class="bi bi-telephone"></i> Calls OK</label></div>
+          </div>
+        </div>
+        <div class="col-12 d-flex gap-3 mt-2">
+          <button class="btn-espresso btn" onclick="submitNewCafe()"><i class="bi bi-plus-lg me-1"></i>Save to Database</button>
+          <button class="btn btn-link text-muted text-decoration-none" onclick="showSection('browse')">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- LOGIN PROMPT -->
+<div class="container pb-3">
+  <div class="login-prompt" id="login-prompt">
+    <h5>☕ Know a great café?</h5>
+    <p>Log in or create a free account to add cafés to the directory.</p>
+    <a href="/login" class="btn-prompt-login"><i class="bi bi-box-arrow-in-right me-1"></i>Log In</a>
+    <a href="/register" class="btn-prompt-reg"><i class="bi bi-person-plus me-1"></i>Register Free</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="row g-5 pb-4">
+
+      <div class="col-lg-4">
+        <div class="footer-brand">☕ <span>Café</span>Atlas</div>
+        <p class="footer-tagline">The remote worker's guide to cafés with great coffee and reliable WiFi — curated by the community.</p>
+        <div class="d-flex gap-2 mt-3">
+          <a href="#" class="social-btn" title="GitHub"><i class="bi bi-github"></i></a>
+          <a href="#" class="social-btn" title="Twitter/X"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" class="social-btn" title="Instagram"><i class="bi bi-instagram"></i></a>
+        </div>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <div class="footer-heading">Explore</div>
+        <a href="/" class="footer-link">All Cafés</a>
+        <a href="#" class="footer-link" onclick="setFilter('wifi',document.querySelectorAll('.filter-chip')[1]);showSection('browse');return false">WiFi Spots</a>
+        <a href="#" class="footer-link" onclick="setFilter('sockets',document.querySelectorAll('.filter-chip')[2]);showSection('browse');return false">With Sockets</a>
+        <a href="#" class="footer-link" onclick="setFilter('calls',document.querySelectorAll('.filter-chip')[4]);showSection('browse');return false">Calls OK</a>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <div class="footer-heading">Account</div>
+        <a href="/login"           class="footer-link">Log In</a>
+        <a href="/register"        class="footer-link">Register</a>
+        <a href="/forgot-password" class="footer-link">Reset Password</a>
+        <a href="/admin"           class="footer-link" id="footer-admin-link" style="display:none">Admin Panel</a>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="footer-heading">Stay Updated</div>
+        <p style="color:var(--muted-txt);font-size:.85rem;margin-bottom:12px">Get notified when new cafés are added in your area.</p>
+        <div class="newsletter-pill">
+          <input type="email" id="newsletter-email" placeholder="your@email.com"/>
+          <button onclick="handleNewsletter()">Subscribe</button>
+        </div>
+        <p style="color:var(--muted-txt);font-size:.75rem;margin-top:8px"><i class="bi bi-shield-check me-1"></i>No spam. Unsubscribe anytime.</p>
+      </div>
+
+    </div>
+    <hr class="footer-divider"/>
+  </div>
+  <div class="footer-bottom">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <span>© 2026 Café Atlas. Built with ☕ + Flask + Bootstrap.</span>
+      <span>
+        <a href="#" class="footer-link d-inline me-3" style="font-size:.82rem">Privacy</a>
+        <a href="#" class="footer-link d-inline" style="font-size:.82rem">Terms</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<!-- MODALS -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content p-2">
+    <div class="modal-header"><h5 class="modal-title">Remove this café?</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body text-muted" style="font-size:.9rem">This will <strong>permanently delete</strong> the café from the database.</div>
+    <div class="modal-footer">
+      <button class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancel</button>
+      <button class="btn btn-danger px-4" onclick="confirmDelete()"><i class="bi bi-trash3 me-1"></i>Delete</button>
+    </div>
+  </div></div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content p-2">
+    <div class="modal-header"><h5 class="modal-title">Update Coffee Price</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <p class="text-muted mb-3" style="font-size:.9rem">Updating: <strong id="edit-cafe-name"></strong></p>
+      <label class="form-label">New Price</label>
+      <input id="edit-price-input" type="text" class="form-control" placeholder="e.g. £3.00"/>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancel</button>
+      <button class="btn btn-espresso px-4" onclick="confirmPriceUpdate()" style="background:var(--espresso);color:#fff;border:none;"><i class="bi bi-check-lg me-1"></i>Update</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1100">
+  <div id="liveToast" class="toast align-items-center border-0 text-white bg-dark" role="alert">
+    <div class="d-flex">
+      <div class="toast-body fw-medium" id="toast-msg"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab-add" onclick="showSection('add')">
+  <i class="bi bi-plus-lg"></i> Add a Café
+</button>
+
+<!-- BACK TO TOP -->
+<button id="back-to-top" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="bi bi-arrow-up"></i>
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/main.js"></script>
+<script>
+// ── DARK MODE ───────────────────────────────────────────────────────────────
+// Restore preference BEFORE paint to prevent flash
+(function() {
+  const saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('theme-toggle');
+  const icon   = document.getElementById('theme-icon');
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    icon.className = theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+    localStorage.setItem('theme', theme);
+  }
+
+  applyTheme(localStorage.getItem('theme') || 'light');
+
+  toggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+
+  // Show Admin Panel footer link if user is admin
+  setTimeout(() => {
+    if (typeof isAdmin === 'function' && isAdmin()) {
+      const link = document.getElementById('footer-admin-link');
+      if (link) link.style.display = 'block';
+    }
+  }, 300);
+});
+
+// ── BACK TO TOP ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('back-to-top');
+  btn.classList.toggle('visible', window.scrollY > 400);
+});
+
+// ── NEWSLETTER ───────────────────────────────────────────────────────────────
+async function handleNewsletter() {
+  const emailEl = document.getElementById('newsletter-email');
+  const email   = emailEl.value.trim();
+  if (!email || !email.includes('@')) {
+    showToast('Please enter a valid email address.', 'bg-warning text-dark');
+    return;
+  }
+  try {
+    const res  = await fetch('/newsletter/subscribe', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    showToast(data.success || data.message || data.error,
+              res.ok ? 'bg-success' : 'bg-danger');
+    if (res.ok) emailEl.value = '';
+  } catch (e) {
+    showToast('Could not subscribe. Please try again.', 'bg-danger');
+  }
+}
+</script>
+</body>
+</html>
