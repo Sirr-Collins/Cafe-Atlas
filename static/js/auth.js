@@ -177,19 +177,27 @@ function renderNavbar() {
   area.innerHTML = `
     <div class="user-badge">
       <span class="role-dot ${roleClass}"></span>
-      ${isAdmin() ? '⚙ ' : '👤 '} ${name}
-      ${!isConfirmed() ? '<span class="badge bg-warning text-dark ms-1" style="font-size:.7rem">unconfirmed</span>' : ''}
+      <span class="d-none d-sm-inline">${isAdmin() ? '⚙ ' : '👤 '} ${name}</span>
+      <span class="d-inline d-sm-none">${isAdmin() ? '⚙' : '👤'}</span>
+      ${!isConfirmed() ? '<span class="badge bg-warning text-dark ms-1" style="font-size:.7rem">!</span>' : ''}
     </div>
     ${isConfirmed() ? `
       <button class="nav-btn nav-btn-solid" onclick="showSection('add')">
-        <i class="bi bi-plus-lg"></i> Add Café
+        <i class="bi bi-plus-lg"></i>
+        <span class="d-none d-md-inline"> Add Café</span>
       </button>` : ''}
     <a href="/profile" class="nav-btn">
-      <i class="bi bi-person-circle"></i> Profile
+      <i class="bi bi-person-circle"></i>
+      <span class="d-none d-md-inline"> Profile</span>
     </a>
-    ${isAdmin() ? `<a href="/admin" class="nav-btn"><i class="bi bi-speedometer2"></i> Dashboard</a>` : ''}
+    ${isAdmin() ? `
+      <a href="/admin" class="nav-btn">
+        <i class="bi bi-speedometer2"></i>
+        <span class="d-none d-lg-inline"> Dashboard</span>
+      </a>` : ''}
     <button class="nav-btn" onclick="logout()">
-      <i class="bi bi-box-arrow-right"></i> Logout
+      <i class="bi bi-box-arrow-right"></i>
+      <span class="d-none d-md-inline"> Logout</span>
     </button>`;
 }
 

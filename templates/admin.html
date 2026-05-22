@@ -133,6 +133,62 @@
     #back-to-top { position:fixed; bottom:32px; right:32px; z-index:500; background:var(--espresso); color:#fff; border:none; border-radius:50%; width:44px; height:44px; font-size:1.1rem; cursor:pointer; display:none; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(43,26,14,.25); transition:all .25s; }
     #back-to-top:hover { background:var(--roast); transform:translateY(-2px); }
     #back-to-top.visible { display:flex; }
+
+    /* ═══════════════════════════════════════════════════════
+       MOBILE RESPONSIVENESS
+       ═══════════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      body { overflow-x: hidden; }
+
+      /* NAVBAR */
+      .navbar { padding: 8px 12px !important; flex-wrap: wrap; gap: 6px; }
+      .navbar-brand { font-size: 1.1rem !important; }
+      .nav-link-btn { padding: 5px 10px !important; font-size: .78rem !important; }
+      .theme-toggle { padding: 5px 8px !important; font-size: .8rem; }
+      /* Stack navbar on mobile */
+      nav.navbar { flex-direction: row; flex-wrap: wrap; }
+      nav.navbar > div { flex-wrap: wrap; gap: 4px !important; }
+
+      /* PAGE TITLE */
+      .page-title { font-size: 1.5rem !important; }
+
+      /* STAT CARDS */
+      .stat-card { padding: 16px !important; }
+      .stat-num { font-size: 1.8rem !important; }
+      .stat-label { font-size: .78rem !important; }
+      .stat-icon { font-size: 1.4rem !important; }
+
+      /* TABS */
+      .admin-tab { padding: 8px 12px !important; font-size: .82rem !important; }
+
+      /* TABLE TOOLBAR */
+      .table-toolbar { flex-direction: column !important; align-items: stretch !important; }
+      .table-search { min-width: 100% !important; }
+      .table-count { text-align: right; }
+
+      /* TABLES — scroll horizontally on mobile */
+      .admin-table { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+      .admin-table table { min-width: 600px; }
+
+      /* ACTION BUTTONS */
+      .btn-sm-action { padding: 4px 8px !important; font-size: .75rem !important; }
+
+      /* NEWSLETTER */
+      .newsletter-cards .col-md-6 { margin-bottom: 16px; }
+      #custom-subject, #custom-body { font-size: .88rem; }
+
+      /* BACK TO TOP */
+      #back-to-top { bottom: 20px !important; right: 16px !important;
+                     width: 38px !important; height: 38px !important; }
+    }
+
+    @media (max-width: 480px) {
+      .admin-tab { padding: 6px 8px !important; font-size: .76rem !important; }
+      .stat-num { font-size: 1.5rem !important; }
+      .page-title { font-size: 1.3rem !important; }
+      nav.navbar > div span.text-white { display: none; } /* hide "Admin Panel" text */
+    }
+    /* ═══════════════════════════════════════════════════════ */
   </style>
 </head>
 <body>
@@ -212,6 +268,7 @@
         <span class="table-count" id="cafe-count"></span>
       </div>
       <div class="admin-table">
+        <div class="table-responsive">
         <table class="table table-hover">
           <thead>
             <tr>
@@ -237,6 +294,7 @@
         <span class="table-count" id="user-count"></span>
       </div>
       <div class="admin-table">
+        <div class="table-responsive">
         <table class="table table-hover">
           <thead>
             <tr>
@@ -341,6 +399,7 @@
               <tr><td colspan="4" class="text-center py-4"><div class="spinner-border spinner-border-sm" style="color:var(--caramel)"></div></td></tr>
             </tbody>
           </table>
+        </div>
         </div>
       </div>
 
