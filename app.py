@@ -38,39 +38,68 @@ import os
 
 app = Flask(__name__)
 
+# app.config.update(
+#     SECRET_KEY                = os.environ.get('SECRET_KEY'),
+#     SQLALCHEMY_DATABASE_URI   = 'sqlite:///cafes.db',
+#     SQLALCHEMY_TRACK_MODIFICATIONS = False,
+#
+#     # ── JWT CONFIG ──────────────────────────────────────────
+#     # Tokens expire after 24 hours — user must log in again after that.
+#     # In production, use a long random string for JWT_SECRET_KEY.
+#     JWT_SECRET_KEY            = os.environ.get('JWT_SECRET_KEY'),
+#     JWT_ACCESS_TOKEN_EXPIRES  = timedelta(hours=24),
+#
+#     # ── EMAIL CONFIG ────────────────────────────────────────
+#     # For development: use Gmail or Mailtrap (https://mailtrap.io)
+#     # Mailtrap is a fake inbox perfect for testing emails safely.
+#     #
+#     # To use Gmail:
+#     #   MAIL_USERNAME = 'your@gmail.com'
+#     #   MAIL_PASSWORD = 'your-app-password'  ← NOT your real password
+#     #   (Generate an App Password in Google Account → Security → App Passwords)
+#     #
+#     # To use Mailtrap (recommended for dev):
+#     #   MAIL_SERVER   = 'sandbox.smtp.mailtrap.io'
+#     #   MAIL_PORT     = 2525
+#     #   MAIL_USERNAME = 'your-mailtrap-username'
+#     #   MAIL_PASSWORD = 'your-mailtrap-password'
+#     MAIL_SERVER               = os.environ.get('MAIL_SERVER',   'smtp.gmail.com'),
+#     MAIL_PORT                 = int(os.environ.get('MAIL_PORT', 587)),
+#     MAIL_USE_TLS              = True,
+#     MAIL_USERNAME             = os.environ.get('MAIL_USERNAME', 'your@email.com'),
+#     MAIL_PASSWORD             = os.environ.get('MAIL_PASSWORD', 'your-app-password'),
+#     MAIL_DEFAULT_SENDER       = os.environ.get('MAIL_USERNAME', 'your@email.com'),
+#     BASE_URL                 = os.environ.get('BASE_URL', 'http://localhost:5000'),
+# )
+
+# ── DATABASE URL SETUP ──────────────────────────────────────
+# Grab the URL from Render, fallback to local SQLite for development
+db_url = os.environ.get('DATABASE_URL', 'sqlite:///cafes.db')
+
+# SQLAlchemy requires 'postgresql://', but Supabase sometimes provides 'postgres://'
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+# ────────────────────────────────────────────────────────────
+
 app.config.update(
-    SECRET_KEY                = os.environ.get('SECRET_KEY'),
-    SQLALCHEMY_DATABASE_URI   = 'sqlite:///cafes.db',
+    SECRET_KEY                = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
+    SQLALCHEMY_DATABASE_URI   = db_url,
     SQLALCHEMY_TRACK_MODIFICATIONS = False,
 
     # ── JWT CONFIG ──────────────────────────────────────────
-    # Tokens expire after 24 hours — user must log in again after that.
-    # In production, use a long random string for JWT_SECRET_KEY.
-    JWT_SECRET_KEY            = os.environ.get('JWT_SECRET_KEY'),
+    JWT_SECRET_KEY            = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production'),
     JWT_ACCESS_TOKEN_EXPIRES  = timedelta(hours=24),
 
     # ── EMAIL CONFIG ────────────────────────────────────────
-    # For development: use Gmail or Mailtrap (https://mailtrap.io)
-    # Mailtrap is a fake inbox perfect for testing emails safely.
-    #
-    # To use Gmail:
-    #   MAIL_USERNAME = 'your@gmail.com'
-    #   MAIL_PASSWORD = 'your-app-password'  ← NOT your real password
-    #   (Generate an App Password in Google Account → Security → App Passwords)
-    #
-    # To use Mailtrap (recommended for dev):
-    #   MAIL_SERVER   = 'sandbox.smtp.mailtrap.io'
-    #   MAIL_PORT     = 2525
-    #   MAIL_USERNAME = 'your-mailtrap-username'
-    #   MAIL_PASSWORD = 'your-mailtrap-password'
     MAIL_SERVER               = os.environ.get('MAIL_SERVER',   'smtp.gmail.com'),
     MAIL_PORT                 = int(os.environ.get('MAIL_PORT', 587)),
     MAIL_USE_TLS              = True,
     MAIL_USERNAME             = os.environ.get('MAIL_USERNAME', 'your@email.com'),
     MAIL_PASSWORD             = os.environ.get('MAIL_PASSWORD', 'your-app-password'),
     MAIL_DEFAULT_SENDER       = os.environ.get('MAIL_USERNAME', 'your@email.com'),
-    BASE_URL                 = os.environ.get('BASE_URL', 'http://localhost:5000'),
+    BASE_URL                  = os.environ.get('BASE_URL', 'http://localhost:5000'),
 )
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  EXTENSIONS
