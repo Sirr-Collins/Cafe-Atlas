@@ -176,101 +176,6 @@
     .page-ellipsis { color: var(--muted-txt); padding: 0 4px; font-size: .88rem; }
     [data-theme="dark"] .page-btn { background: var(--card-bg); border-color: var(--border); color: var(--latte); }
     [data-theme="dark"] .page-btn.active { background: var(--caramel); border-color: var(--caramel); color: #fff; }
-
-    /* ═══════════════════════════════════════════════════════
-       MOBILE RESPONSIVENESS  — 768px and below
-       ═══════════════════════════════════════════════════════ */
-    @media (max-width: 768px) {
-
-      /* ── BODY ── */
-      body { overflow-x: hidden; }
-
-      /* ── NAVBAR ── */
-      .navbar { padding: 8px 16px !important; flex-wrap: nowrap; }
-      .navbar-brand { font-size: 1.1rem !important; }
-      .nav-btn { padding: 5px 10px !important; font-size: .78rem !important; gap: 3px; }
-      .nav-btn span, .nav-btn .bi { font-size: .82rem; }
-      /* Hide label text on very small screens, keep icons */
-      .nav-btn-text { display: none; }
-      #nav-auth-area { gap: 4px !important; flex-wrap: wrap; justify-content: flex-end; }
-      .user-badge { padding: 4px 8px; font-size: .76rem; }
-      .theme-toggle { padding: 5px 10px; }
-
-      /* ── HERO ── */
-      .hero { padding: 40px 0 52px !important; }
-      .hero h1 { font-size: 2rem !important; }
-      .hero .lead { font-size: .92rem !important; }
-      .search-pill { max-width: 100% !important; }
-      .search-pill input { padding: 11px 14px; font-size: .88rem; }
-      .search-pill .btn-search { padding: 11px 16px; font-size: .84rem; }
-
-      /* ── STATS STRIP ── */
-      .stats-strip { padding: 12px 0; font-size: .78rem; }
-      .stat-num { font-size: 1.2rem !important; }
-      /* Stack stats on very small phones */
-
-      /* ── FILTERS + SORT ── */
-      .filter-chip { padding: 5px 12px !important; font-size: .78rem !important; }
-      .sort-select { font-size: .78rem !important; padding: 5px 10px !important; }
-      /* Stack filters and sort on separate lines */
-      .d-flex.justify-content-between.mb-4 { flex-direction: column !important; gap: 10px !important; }
-
-      /* ── SECTION TITLE ── */
-      .section-title { font-size: 1.3rem !important; }
-
-      /* ── CARDS ── */
-      .cafe-card .card-body { padding: 14px !important; }
-      .card-title-text { font-size: 1rem !important; }
-      .amenity { font-size: .72rem !important; padding: 2px 8px !important; }
-      .btn-map { font-size: .8rem !important; padding: 7px 0 !important; }
-      .btn-del, .btn-edit { padding: 7px 10px !important; }
-
-      /* ── ADD FORM ── */
-      .form-card { padding: 20px !important; }
-      .form-card.p-4.p-md-5 { padding: 20px !important; }
-
-      /* ── LOGIN PROMPT ── */
-      .login-prompt { padding: 24px 16px !important; }
-      .btn-prompt-login, .btn-prompt-reg { padding: 9px 16px !important; font-size: .84rem !important; }
-
-      /* ── PAGINATION ── */
-      #pagination-wrap { gap: 4px !important; }
-      .page-btn { padding: 6px 10px !important; font-size: .8rem !important; }
-
-      /* ── FOOTER ── */
-      footer { padding: 36px 0 0 !important; }
-      .footer-brand { font-size: 1.2rem; }
-      .footer-tagline { font-size: .82rem; }
-      .newsletter-pill input { padding: 9px 12px; font-size: .84rem; }
-      .newsletter-pill button { padding: 9px 14px; font-size: .8rem; }
-      .footer-bottom { font-size: .76rem; padding: 12px 0; }
-      .footer-bottom .d-flex { flex-direction: column !important; text-align: center; gap: 8px !important; }
-
-      /* ── FAB ── */
-      .fab { bottom: 20px !important; right: 16px !important; padding: 12px 18px !important; font-size: .88rem !important; }
-
-      /* ── BACK TO TOP ── */
-      #back-to-top { bottom: 20px !important; left: 16px !important; width: 38px !important; height: 38px !important; }
-
-      /* ── MODALS ── */
-      .modal-content { margin: 12px; }
-
-      /* ── CONFIRM BANNER ── */
-      .confirm-banner { font-size: .82rem; padding: 10px 14px; }
-    }
-
-    @media (max-width: 480px) {
-      /* Extra small phones */
-      .hero h1 { font-size: 1.7rem !important; }
-      .stat-num { font-size: 1rem !important; }
-      .stats-strip { font-size: .72rem; }
-      .stats-strip .col-4 { padding: 0 4px !important; }
-      .navbar-brand { font-size: 1rem !important; }
-      /* On tiny screens hide all nav btn text, show only icons */
-      .nav-btn { padding: 5px 8px !important; }
-      .cafe-card .card-img-wrap { height: 160px !important; }
-    }
-    /* ═══════════════════════════════════════════════════════ */
   </style>
 </head>
 <body>
@@ -278,11 +183,11 @@
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg py-2 px-4">
   <a class="navbar-brand me-auto" href="/">☕ <span>Café</span>Atlas</a>
-  <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+  <div class="d-flex align-items-center gap-2">
     <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
       <i class="bi bi-moon-stars" id="theme-icon"></i>
     </button>
-    <div class="d-flex align-items-center gap-2 flex-wrap" id="nav-auth-area"></div>
+    <div class="d-flex align-items-center gap-2" id="nav-auth-area"></div>
   </div>
 </nav>
 
@@ -300,7 +205,7 @@
 </section>
 
 <!-- STATS -->
-<div class="stats-strip" style="overflow-x:hidden">
+<div class="stats-strip">
   <div class="container">
     <div class="row text-center g-0">
       <div class="col-4"><span class="stat-num" id="stat-total">—</span>Cafés Listed</div>
@@ -311,11 +216,30 @@
 </div>
 
 <!-- CONFIRM BANNER -->
-<div class="container mt-3">
-  <div class="confirm-banner" id="confirm-banner">
-    <i class="bi bi-envelope-exclamation me-2"></i>
-    Your email is not confirmed yet. Some features are restricted.
-    <a href="#" onclick="resendConfirmation()" class="ms-2 fw-bold">Resend confirmation email</a>
+<div class="container mt-3" id="confirm-banner-wrap" style="display:none">
+  <div class="confirm-banner-new" id="confirm-banner">
+    <div class="d-flex align-items-start gap-3">
+      <div class="confirm-icon">
+        <i class="bi bi-envelope-exclamation-fill"></i>
+      </div>
+      <div class="flex-grow-1">
+        <div class="confirm-title">Email not confirmed</div>
+        <div class="confirm-text">
+          Your email address hasn't been verified yet. Some features like adding cafés are restricted until you confirm.
+        </div>
+        <div class="d-flex gap-2 mt-2 flex-wrap">
+          <button class="confirm-btn-primary" onclick="resendConfirmation()">
+            <i class="bi bi-send me-1"></i>Resend confirmation email
+          </button>
+          <button class="confirm-btn-dismiss" onclick="dismissBanner()">
+            Dismiss
+          </button>
+        </div>
+      </div>
+      <button class="confirm-close" onclick="dismissBanner()" title="Dismiss">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -362,7 +286,7 @@
 
   <!-- ADD FORM -->
   <div id="add-section">
-    <div class="form-card card p-3 p-md-5 mx-auto" style="max-width:700px;width:100%">
+    <div class="form-card card p-4 p-md-5 mx-auto" style="max-width:700px">
       <h2 class="section-title mb-1">Add a New Café</h2>
       <p class="text-muted mb-4" style="font-size:.9rem">Saved directly to the database.</p>
       <div class="row g-3">
@@ -410,9 +334,9 @@
         <div class="footer-brand">☕ <span>Café</span>Atlas</div>
         <p class="footer-tagline">The remote worker's guide to cafés with great coffee and reliable WiFi — curated by the community.</p>
         <div class="d-flex gap-2 mt-3">
-          <a href="https://github.com/Sirr-Collins/" class="social-btn" title="GitHub"><i class="bi bi-github"></i></a>
-          <a href="https://x.com/lane7550" class="social-btn" title="Twitter/X"><i class="bi bi-twitter-x"></i></a>
-          <a href="https://www.facebook.com/share/1CppsVUh6n/" class="social-btn" title="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="social-btn" title="GitHub"><i class="bi bi-github"></i></a>
+          <a href="#" class="social-btn" title="Twitter/X"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" class="social-btn" title="Instagram"><i class="bi bi-instagram"></i></a>
         </div>
       </div>
 
@@ -545,6 +469,51 @@ window.addEventListener('scroll', () => {
   const btn = document.getElementById('back-to-top');
   btn.classList.toggle('visible', window.scrollY > 400);
 });
+
+// ── HAMBURGER MENU ───────────────────────────────────────────────────────────
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobile-nav-menu');
+  const icon = document.getElementById('hamburger-icon');
+  const isOpen = menu.style.display !== 'none';
+
+  if (isOpen) {
+    menu.style.display = 'none';
+    icon.className = 'bi bi-list';
+    icon.style.fontSize = '1.2rem';
+  } else {
+    // Populate mobile menu with same content as desktop nav
+    const desktopArea = document.getElementById('nav-auth-area');
+    const mobileArea  = document.getElementById('mobile-auth-area');
+    if (desktopArea && mobileArea) {
+      mobileArea.innerHTML = desktopArea.innerHTML;
+    }
+    menu.style.display = 'block';
+    icon.className = 'bi bi-x-lg';
+    icon.style.fontSize = '1.1rem';
+  }
+}
+
+// Close mobile menu when clicking outside
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('mobile-nav-menu');
+  const btn  = document.getElementById('mobile-menu-btn');
+  if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.style.display = 'none';
+    const icon = document.getElementById('hamburger-icon');
+    if (icon) { icon.className = 'bi bi-list'; icon.style.fontSize = '1.2rem'; }
+  }
+});
+
+// ── CONFIRMATION BANNER ────────────────────────────────────────────────────────
+function dismissBanner() {
+  const wrap = document.getElementById('confirm-banner-wrap');
+  if (wrap) {
+    wrap.style.animation = 'fadeOut .3s ease forwards';
+    setTimeout(() => wrap.style.display = 'none', 300);
+  }
+  // Remember dismissal for this session
+  sessionStorage.setItem('bannerDismissed', '1');
+}
 
 // ── NEWSLETTER ───────────────────────────────────────────────────────────────
 async function handleNewsletter() {

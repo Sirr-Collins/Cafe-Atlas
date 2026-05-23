@@ -107,7 +107,7 @@ async function loadCafes(page = 1, search = '') {
       <div class="col-12">
         <div class="alert alert-warning">
           <i class="bi bi-exclamation-triangle me-2"></i>
-          Could not connect to Flask. Make sure <code>app.py</code> is running on port 5000.
+          Could not load cafés. Please check your connection and try again.
         </div>
       </div>`;
     document.getElementById('count-badge').textContent = 'Error';

@@ -38,76 +38,40 @@ import os
 
 app = Flask(__name__)
 
-# app.config.update(
-#     SECRET_KEY                = os.environ.get('SECRET_KEY'),
-#     SQLALCHEMY_DATABASE_URI   = 'sqlite:///cafes.db',
-#     SQLALCHEMY_TRACK_MODIFICATIONS = False,
-#
-#     # ── JWT CONFIG ──────────────────────────────────────────
-#     # Tokens expire after 24 hours — user must log in again after that.
-#     # In production, use a long random string for JWT_SECRET_KEY.
-#     JWT_SECRET_KEY            = os.environ.get('JWT_SECRET_KEY'),
-#     JWT_ACCESS_TOKEN_EXPIRES  = timedelta(hours=24),
-#
-#     # ── EMAIL CONFIG ────────────────────────────────────────
-#     # For development: use Gmail or Mailtrap (https://mailtrap.io)
-#     # Mailtrap is a fake inbox perfect for testing emails safely.
-#     #
-#     # To use Gmail:
-#     #   MAIL_USERNAME = 'your@gmail.com'
-#     #   MAIL_PASSWORD = 'your-app-password'  ← NOT your real password
-#     #   (Generate an App Password in Google Account → Security → App Passwords)
-#     #
-#     # To use Mailtrap (recommended for dev):
-#     #   MAIL_SERVER   = 'sandbox.smtp.mailtrap.io'
-#     #   MAIL_PORT     = 2525
-#     #   MAIL_USERNAME = 'your-mailtrap-username'
-#     #   MAIL_PASSWORD = 'your-mailtrap-password'
-#     MAIL_SERVER               = os.environ.get('MAIL_SERVER',   'smtp.gmail.com'),
-#     MAIL_PORT                 = int(os.environ.get('MAIL_PORT', 587)),
-#     MAIL_USE_TLS              = True,
-#     MAIL_USERNAME             = os.environ.get('MAIL_USERNAME', 'your@email.com'),
-#     MAIL_PASSWORD             = os.environ.get('MAIL_PASSWORD', 'your-app-password'),
-#     MAIL_DEFAULT_SENDER       = os.environ.get('MAIL_USERNAME', 'your@email.com'),
-#     BASE_URL                 = os.environ.get('BASE_URL', 'http://localhost:5000'),
-# )
-
-# ── DATABASE URL SETUP ──────────────────────────────────────
-# Grab the URL from Render, fallback to local SQLite for development
-db_url = os.environ.get('DATABASE_URL', 'sqlite:///cafes.db')
-
-# SQLAlchemy requires 'postgresql://', but Supabase sometimes provides 'postgres://'
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
-# ────────────────────────────────────────────────────────────
 app.config.update(
-    SECRET_KEY=os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
-    SQLALCHEMY_DATABASE_URI=db_url,
-    SQLALCHEMY_TRACK_MODIFICATIONS=False,
-
-    # ── ADD THIS NEW BLOCK ──────────────────────────────────
-    SQLALCHEMY_ENGINE_OPTIONS={
-        "pool_pre_ping": True,  # Verifies connection is alive before using it
-        "pool_recycle": 300,  # Recycles connections every 5 minutes automatically
-    },
-    # ────────────────────────────────────────────────────────
+    SECRET_KEY                = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
+    SQLALCHEMY_DATABASE_URI   = 'sqlite:///cafes.db',
+    SQLALCHEMY_TRACK_MODIFICATIONS = False,
 
     # ── JWT CONFIG ──────────────────────────────────────────
-    JWT_SECRET_KEY=os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production'),
-    JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=24),
+    # Tokens expire after 24 hours — user must log in again after that.
+    # In production, use a long random string for JWT_SECRET_KEY.
+    JWT_SECRET_KEY            = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production'),
+    JWT_ACCESS_TOKEN_EXPIRES  = timedelta(hours=24),
 
     # ── EMAIL CONFIG ────────────────────────────────────────
-    MAIL_SERVER=os.environ.get('MAIL_SERVER', 'smtp.gmail.com'),
-    MAIL_PORT=int(os.environ.get('MAIL_PORT', 587)),
-    MAIL_USE_TLS=True,
-    MAIL_USERNAME=os.environ.get('MAIL_USERNAME', 'your@email.com'),
-    MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD', 'your-app-password'),
-    MAIL_DEFAULT_SENDER=os.environ.get('MAIL_USERNAME', 'your@email.com'),
-    BASE_URL=os.environ.get('BASE_URL', 'http://localhost:5000'),
+    # For development: use Gmail or Mailtrap (https://mailtrap.io)
+    # Mailtrap is a fake inbox perfect for testing emails safely.
+    #
+    # To use Gmail:
+    #   MAIL_USERNAME = 'your@gmail.com'
+    #   MAIL_PASSWORD = 'your-app-password'  ← NOT your real password
+    #   (Generate an App Password in Google Account → Security → App Passwords)
+    #
+    # To use Mailtrap (recommended for dev):
+    #   MAIL_SERVER   = 'sandbox.smtp.mailtrap.io'
+    #   MAIL_PORT     = 2525
+    #   MAIL_USERNAME = 'your-mailtrap-username'
+    #   MAIL_PASSWORD = 'your-mailtrap-password'
+    MAIL_SERVER               = os.environ.get('MAIL_SERVER',   'smtp.gmail.com'),
+    MAIL_PORT                 = int(os.environ.get('MAIL_PORT',  587)),
+    MAIL_USE_TLS              = os.environ.get('MAIL_USE_TLS',  'true').lower() == 'true',
+    MAIL_USE_SSL              = os.environ.get('MAIL_USE_SSL',  'false').lower() == 'true',
+    MAIL_USERNAME             = os.environ.get('MAIL_USERNAME'),
+    MAIL_PASSWORD             = os.environ.get('MAIL_PASSWORD'),
+    MAIL_DEFAULT_SENDER       = os.environ.get('MAIL_USERNAME'),
+    BASE_URL                  = os.environ.get('BASE_URL', 'http://localhost:5000'),
 )
-
-
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  EXTENSIONS
@@ -397,8 +361,11 @@ def send_confirmation_email(user_email, user_name):
     Generates a signed token and sends a confirmation link to the user.
     The token encodes the email address and expires in 1 hour.
     """
+    # Debug logging — check Render logs to verify config is loaded
+    print(f"[MAIL] Sending confirmation to {user_email}")
+    print(f"[MAIL] Server={app.config.get('MAIL_SERVER')} Port={app.config.get('MAIL_PORT')} User={app.config.get('MAIL_USERNAME')} BASE_URL={app.config.get('BASE_URL')}")
     token = serializer.dumps(user_email, salt='email-confirm')
-    link  = f"{app.config['BASE_URL']}/auth/confirm/{token}"
+    link  = f"http://localhost:5000/auth/confirm/{token}"
 
     msg = Message(
         subject    = '☕ Confirm your Café Atlas account',
@@ -430,7 +397,7 @@ def send_password_reset_email(user_email, user_name):
     cross-used between flows.
     """
     token = serializer.dumps(user_email, salt='password-reset')
-    link  = f"{app.config['BASE_URL']}/auth/reset-password/{token}"
+    link  = f"http://localhost:5000/auth/reset-password/{token}"
 
     msg = Message(
         subject    = '☕ Reset your Café Atlas password',

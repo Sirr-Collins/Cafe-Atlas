@@ -133,62 +133,6 @@
     #back-to-top { position:fixed; bottom:32px; right:32px; z-index:500; background:var(--espresso); color:#fff; border:none; border-radius:50%; width:44px; height:44px; font-size:1.1rem; cursor:pointer; display:none; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(43,26,14,.25); transition:all .25s; }
     #back-to-top:hover { background:var(--roast); transform:translateY(-2px); }
     #back-to-top.visible { display:flex; }
-
-    /* ═══════════════════════════════════════════════════════
-       MOBILE RESPONSIVENESS
-       ═══════════════════════════════════════════════════════ */
-    @media (max-width: 768px) {
-      body { overflow-x: hidden; }
-
-      /* NAVBAR */
-      .navbar { padding: 8px 12px !important; flex-wrap: wrap; gap: 6px; }
-      .navbar-brand { font-size: 1.1rem !important; }
-      .nav-link-btn { padding: 5px 10px !important; font-size: .78rem !important; }
-      .theme-toggle { padding: 5px 8px !important; font-size: .8rem; }
-      /* Stack navbar on mobile */
-      nav.navbar { flex-direction: row; flex-wrap: wrap; }
-      nav.navbar > div { flex-wrap: wrap; gap: 4px !important; }
-
-      /* PAGE TITLE */
-      .page-title { font-size: 1.5rem !important; }
-
-      /* STAT CARDS */
-      .stat-card { padding: 16px !important; }
-      .stat-num { font-size: 1.8rem !important; }
-      .stat-label { font-size: .78rem !important; }
-      .stat-icon { font-size: 1.4rem !important; }
-
-      /* TABS */
-      .admin-tab { padding: 8px 12px !important; font-size: .82rem !important; }
-
-      /* TABLE TOOLBAR */
-      .table-toolbar { flex-direction: column !important; align-items: stretch !important; }
-      .table-search { min-width: 100% !important; }
-      .table-count { text-align: right; }
-
-      /* TABLES — scroll horizontally on mobile */
-      .admin-table { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
-      .admin-table table { min-width: 600px; }
-
-      /* ACTION BUTTONS */
-      .btn-sm-action { padding: 4px 8px !important; font-size: .75rem !important; }
-
-      /* NEWSLETTER */
-      .newsletter-cards .col-md-6 { margin-bottom: 16px; }
-      #custom-subject, #custom-body { font-size: .88rem; }
-
-      /* BACK TO TOP */
-      #back-to-top { bottom: 20px !important; right: 16px !important;
-                     width: 38px !important; height: 38px !important; }
-    }
-
-    @media (max-width: 480px) {
-      .admin-tab { padding: 6px 8px !important; font-size: .76rem !important; }
-      .stat-num { font-size: 1.5rem !important; }
-      .page-title { font-size: 1.3rem !important; }
-      nav.navbar > div span.text-white { display: none; } /* hide "Admin Panel" text */
-    }
-    /* ═══════════════════════════════════════════════════════ */
   </style>
 </head>
 <body>
@@ -268,7 +212,6 @@
         <span class="table-count" id="cafe-count"></span>
       </div>
       <div class="admin-table">
-        <div class="table-responsive">
         <table class="table table-hover">
           <thead>
             <tr>
@@ -294,7 +237,6 @@
         <span class="table-count" id="user-count"></span>
       </div>
       <div class="admin-table">
-        <div class="table-responsive">
         <table class="table table-hover">
           <thead>
             <tr>
@@ -400,7 +342,6 @@
             </tbody>
           </table>
         </div>
-        </div>
       </div>
 
     </div><!-- /tab-newsletter -->
@@ -455,6 +396,7 @@
 const bsToast      = new bootstrap.Toast(document.getElementById('toast'), {delay:3000});
 const delCafeModal = new bootstrap.Modal(document.getElementById('delCafeModal'));
 const delUserModal = new bootstrap.Modal(document.getElementById('delUserModal'));
+const viewUserModal = new bootstrap.Modal(document.getElementById('viewUserModal'));
 let pendingDeleteCafeId = null;
 let pendingDeleteUserId = null;
 
@@ -655,6 +597,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderUserTable(q ? allUsersData.filter(u =>
       u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
     ) : allUsersData);
+  };
+
+  window.openViewUser = function(userId) {
+    const u = allUsersData.find(u => u.id === userId);
+    if (!u) return;
+
+    document.getElementById('user-detail-body').innerHTML = `
+      <div class="row g-4">
+        <!-- Avatar + basic info -->
+        <div class="col-md-4 text-center">
+          <div style="width:80px;height:80px;border-radius:50%;background:var(--caramel);
+                      display:flex;align-items:center;justify-content:center;
+                      color:#fff;font-size:2rem;font-weight:600;margin:0 auto 12px">
+            ${u.avatar_url
+              ? `<img src="${u.avatar_url}" style="width:80px;height:80px;border-radius:50%;object-fit:cover"
+                      onerror="this.parentElement.textContent='${u.name ? u.name[0].toUpperCase() : '?'}'"/>`
+              : (u.name ? u.name[0].toUpperCase() : '?')}
+          </div>
+          <h5 style="font-family:'Playfair Display',serif;margin-bottom:4px">${u.name}</h5>
+          <span class="role-badge ${u.role}">${u.role}</span>
+          <p class="mt-2" style="font-size:.82rem;color:var(--muted-txt)">
+            ${u.is_confirmed
+              ? '<i class="bi bi-check-circle-fill text-success me-1"></i>Email confirmed'
+              : '<i class="bi bi-x-circle text-danger me-1"></i>Email not confirmed'}
+          </p>
+        </div>
+
+        <!-- Details -->
+        <div class="col-md-8">
+          <table class="table table-sm" style="font-size:.88rem">
+            <tbody>
+              <tr><td style="color:var(--muted-txt);width:120px">Email</td><td><strong>${u.email}</strong></td></tr>
+              <tr><td style="color:var(--muted-txt)">Role</td><td><span class="role-badge ${u.role}">${u.role}</span></td></tr>
+              <tr><td style="color:var(--muted-txt)">Joined</td><td>${u.created_at ? u.created_at.substring(0,10) : '—'}</td></tr>
+              <tr><td style="color:var(--muted-txt)">Confirmed</td><td>${u.confirmed_at ? u.confirmed_at.substring(0,10) : '—'}</td></tr>
+              ${u.bio      ? `<tr><td style="color:var(--muted-txt)">Bio</td><td>${u.bio}</td></tr>` : ''}
+              ${u.location ? `<tr><td style="color:var(--muted-txt)">Location</td><td><i class="bi bi-geo-alt me-1"></i>${u.location}</td></tr>` : ''}
+              ${u.website  ? `<tr><td style="color:var(--muted-txt)">Website</td><td><a href="${u.website}" target="_blank" style="color:var(--caramel)">${u.website}</a></td></tr>` : ''}
+            </tbody>
+          </table>
+
+          <!-- Quick actions -->
+          <div class="d-flex gap-2 mt-3 flex-wrap">
+            ${u.role === 'user'
+              ? `<button class="btn-sm-action btn-promote px-3 py-2"
+                         onclick="setRole(${u.id},'admin');viewUserModal.hide()">
+                   <i class="bi bi-arrow-up-circle me-1"></i>Promote to Admin
+                 </button>`
+              : `<button class="btn-sm-action btn-demote px-3 py-2"
+                         onclick="setRole(${u.id},'user');viewUserModal.hide()">
+                   <i class="bi bi-arrow-down-circle me-1"></i>Demote to User
+                 </button>`}
+            <button class="btn-sm-action btn-remove px-3 py-2"
+                    onclick="viewUserModal.hide();openDelUser(${u.id},'${u.name.replace(/'/g,"\'")}')">
+              <i class="bi bi-trash3 me-1"></i>Delete User
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    viewUserModal.show();
   };
 
   window.setRole = async function(userId, role) {

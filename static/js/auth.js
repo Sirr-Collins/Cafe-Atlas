@@ -177,27 +177,19 @@ function renderNavbar() {
   area.innerHTML = `
     <div class="user-badge">
       <span class="role-dot ${roleClass}"></span>
-      <span class="d-none d-sm-inline">${isAdmin() ? '⚙ ' : '👤 '} ${name}</span>
-      <span class="d-inline d-sm-none">${isAdmin() ? '⚙' : '👤'}</span>
-      ${!isConfirmed() ? '<span class="badge bg-warning text-dark ms-1" style="font-size:.7rem">!</span>' : ''}
+      ${isAdmin() ? '⚙ ' : '👤 '} ${name}
+      ${!isConfirmed() ? '<span class="badge bg-warning text-dark ms-1" style="font-size:.7rem">unconfirmed</span>' : ''}
     </div>
     ${isConfirmed() ? `
       <button class="nav-btn nav-btn-solid" onclick="showSection('add')">
-        <i class="bi bi-plus-lg"></i>
-        <span class="d-none d-md-inline"> Add Café</span>
+        <i class="bi bi-plus-lg"></i> Add Café
       </button>` : ''}
     <a href="/profile" class="nav-btn">
-      <i class="bi bi-person-circle"></i>
-      <span class="d-none d-md-inline"> Profile</span>
+      <i class="bi bi-person-circle"></i> Profile
     </a>
-    ${isAdmin() ? `
-      <a href="/admin" class="nav-btn">
-        <i class="bi bi-speedometer2"></i>
-        <span class="d-none d-lg-inline"> Dashboard</span>
-      </a>` : ''}
+    ${isAdmin() ? `<a href="/admin" class="nav-btn"><i class="bi bi-speedometer2"></i> Dashboard</a>` : ''}
     <button class="nav-btn" onclick="logout()">
-      <i class="bi bi-box-arrow-right"></i>
-      <span class="d-none d-md-inline"> Logout</span>
+      <i class="bi bi-box-arrow-right"></i> Logout
     </button>`;
 }
 
@@ -205,8 +197,11 @@ function renderNavbar() {
 
 function showConfirmBanner() {
   if (isLoggedIn() && !isConfirmed()) {
-    const banner = document.getElementById('confirm-banner');
-    if (banner) banner.style.display = 'block';
+    // Use the wrapper div (confirm-banner-wrap) not the inner div
+    const wrap = document.getElementById('confirm-banner-wrap');
+    if (wrap && !sessionStorage.getItem('bannerDismissed')) {
+      wrap.style.display = 'block';
+    }
   }
 }
 
@@ -215,4 +210,21 @@ function showConfirmBanner() {
 document.addEventListener('DOMContentLoaded', () => {
   renderNavbar();
   showConfirmBanner();
+
+  // Sync mobile menu with desktop nav on load
+  // (in case menu is pre-opened or for accessibility)
+  const desktopArea = document.getElementById('nav-auth-area');
+  const mobileArea  = document.getElementById('mobile-auth-area');
+  if (desktopArea && mobileArea) {
+    // Use MutationObserver to sync mobile menu whenever desktop nav changes
+    const observer = new MutationObserver(() => {
+      const menu = document.getElementById('mobile-nav-menu');
+      if (menu && menu.style.display !== 'none') {
+        mobileArea.innerHTML = desktopArea.innerHTML;
+      }
+    });
+    if (desktopArea) {
+      observer.observe(desktopArea, { childList: true, subtree: true });
+    }
+  }
 });
