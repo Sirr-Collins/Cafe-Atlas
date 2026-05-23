@@ -39,14 +39,14 @@ import os
 app = Flask(__name__)
 
 app.config.update(
-    SECRET_KEY                = os.environ.get('SECRET_KEY', 'dev-secret-change-in-production'),
-    SQLALCHEMY_DATABASE_URI   = 'sqlite:///cafes.db',
+    SECRET_KEY                = os.environ.get('SECRET_KEY'),
+    SQLALCHEMY_DATABASE_URI   = os.environ.get('DB_URL'),
     SQLALCHEMY_TRACK_MODIFICATIONS = False,
 
     # ── JWT CONFIG ──────────────────────────────────────────
     # Tokens expire after 24 hours — user must log in again after that.
     # In production, use a long random string for JWT_SECRET_KEY.
-    JWT_SECRET_KEY            = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production'),
+    JWT_SECRET_KEY            = os.environ.get('JWT_SECRET_KEY'),
     JWT_ACCESS_TOKEN_EXPIRES  = timedelta(hours=24),
 
     # ── EMAIL CONFIG ────────────────────────────────────────
@@ -70,7 +70,7 @@ app.config.update(
     MAIL_USERNAME             = os.environ.get('MAIL_USERNAME'),
     MAIL_PASSWORD             = os.environ.get('MAIL_PASSWORD'),
     MAIL_DEFAULT_SENDER       = os.environ.get('MAIL_USERNAME'),
-    BASE_URL                  = os.environ.get('BASE_URL', 'http://localhost:5000'),
+    BASE_URL                  = os.environ.get('BASE_URL'),
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
