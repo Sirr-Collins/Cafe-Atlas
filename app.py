@@ -21,7 +21,7 @@ from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required,
     get_jwt_identity, get_jwt
 )
-from flask_mail import Mail, Message
+import resend
 from flask_bcrypt import Bcrypt
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Boolean, ForeignKey
@@ -49,28 +49,7 @@ app.config.update(
     JWT_SECRET_KEY            = os.environ.get('JWT_SECRET_KEY'),
     JWT_ACCESS_TOKEN_EXPIRES  = timedelta(hours=24),
 
-    # ── EMAIL CONFIG ────────────────────────────────────────
-    # For development: use Gmail or Mailtrap (https://mailtrap.io)
-    # Mailtrap is a fake inbox perfect for testing emails safely.
-    #
-    # To use Gmail:
-    #   MAIL_USERNAME = 'your@gmail.com'
-    #   MAIL_PASSWORD = 'your-app-password'  ← NOT your real password
-    #   (Generate an App Password in Google Account → Security → App Passwords)
-    #
-    # To use Mailtrap (recommended for dev):
-    #   MAIL_SERVER   = 'sandbox.smtp.mailtrap.io'
-    #   MAIL_PORT     = 2525
-    #   MAIL_USERNAME = 'your-mailtrap-username'
-    #   MAIL_PASSWORD = 'your-mailtrap-password'
-    MAIL_SERVER               = os.environ.get('MAIL_SERVER',   'smtp.gmail.com'),
-    MAIL_PORT                 = int(os.environ.get('MAIL_PORT',  587)),
-    MAIL_USE_TLS              = os.environ.get('MAIL_USE_TLS',  'true').lower() == 'true',
-    MAIL_USE_SSL              = os.environ.get('MAIL_USE_SSL',  'false').lower() == 'true',
-    MAIL_USERNAME             = os.environ.get('MAIL_USERNAME'),
-    MAIL_PASSWORD             = os.environ.get('MAIL_PASSWORD'),
-    MAIL_DEFAULT_SENDER       = os.environ.get('MAIL_USERNAME'),
-    BASE_URL                  = os.environ.get('BASE_URL'),
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -79,7 +58,7 @@ app.config.update(
 
 CORS(app)          # Allow cross-origin requests
 bcrypt  = Bcrypt(app)   # Password hashing
-mail    = Mail(app)     # Email sending
+
 jwt     = JWTManager(app)  # JWT token management
 
 # URLSafeTimedSerializer generates signed tokens for email links.
@@ -357,20 +336,15 @@ def confirmed_required(fn):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def send_confirmation_email(user_email, user_name):
-    """
-    Generates a signed token and sends a confirmation link to the user.
-    The token encodes the email address and expires in 1 hour.
-    """
-    # Debug logging — check Render logs to verify config is loaded
-    print(f"[MAIL] Sending confirmation to {user_email}")
-    print(f"[MAIL] Server={app.config.get('MAIL_SERVER')} Port={app.config.get('MAIL_PORT')} User={app.config.get('MAIL_USERNAME')} BASE_URL={app.config.get('BASE_URL')}")
     token = serializer.dumps(user_email, salt='email-confirm')
-    link  = f"http://localhost:5000/auth/confirm/{token}"
+    link  = f"{app.config['BASE_URL']}/auth/confirm/{token}"
 
-    msg = Message(
-        subject    = '☕ Confirm your Café Atlas account',
-        recipients = [user_email],
-        html       = f"""
+    resend.api_key = os.environ.get('RESEND_API_KEY')
+    resend.Emails.send({
+        "from":    "Café Atlas <onboarding@resend.dev>",
+        "to":      [user_email],
+        "subject": "☕ Confirm your Café Atlas account",
+        "html":    f"""
         <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
           <h2 style="color:#2b1a0e">Welcome to Café Atlas, {user_name}!</h2>
           <p>Please confirm your email address by clicking the button below.
@@ -382,31 +356,25 @@ def send_confirmation_email(user_email, user_name):
             Confirm My Email
           </a>
           <p style="color:#8a7060;font-size:.85rem">
-            If you didn't create an account, you can safely ignore this email.
+            If you didn't create an account, ignore this email.
           </p>
-        </div>
-        """
-    )
-    mail.send(msg)
-
+        </div>"""
+    })
 
 def send_password_reset_email(user_email, user_name):
-    """
-    Generates a signed token and sends a password reset link.
-    Uses a different salt to 'email-confirm' so tokens can't be
-    cross-used between flows.
-    """
     token = serializer.dumps(user_email, salt='password-reset')
-    link  = f"http://localhost:5000/auth/reset-password/{token}"
+    link  = f"{app.config['BASE_URL']}/reset-password-page?token={token}"
 
-    msg = Message(
-        subject    = '☕ Reset your Café Atlas password',
-        recipients = [user_email],
-        html       = f"""
+    resend.api_key = os.environ.get('RESEND_API_KEY')
+    resend.Emails.send({
+        "from":    "Café Atlas <onboarding@resend.dev>",
+        "to":      [user_email],
+        "subject": "☕ Reset your Café Atlas password",
+        "html":    f"""
         <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
           <h2 style="color:#2b1a0e">Password Reset Request</h2>
-          <p>Hi {user_name}, we received a request to reset your password.
-             Click below to set a new password. This link expires in <strong>30 minutes</strong>.</p>
+          <p>Hi {user_name}, click below to reset your password.
+             This link expires in <strong>30 minutes</strong>.</p>
           <a href="{link}"
              style="display:inline-block;background:#c0854a;color:#fff;
                     padding:12px 28px;border-radius:8px;text-decoration:none;
@@ -414,13 +382,10 @@ def send_password_reset_email(user_email, user_name):
             Reset My Password
           </a>
           <p style="color:#8a7060;font-size:.85rem">
-            If you didn't request this, you can safely ignore this email.
-            Your password will not change.
+            If you didn't request this, ignore this email.
           </p>
-        </div>
-        """
-    )
-    mail.send(msg)
+        </div>"""
+    })
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1047,26 +1012,24 @@ def newsletter_subscribe():
         token = serializer.dumps(email, salt='newsletter-confirm')
         link  = f"{app.config['BASE_URL']}/newsletter/confirm/{token}"
 
-        msg = Message(
-            subject    = '☕ Confirm your Café Atlas subscription',
-            recipients = [email],
-            html       = f"""
+        resend.api_key = os.environ.get('RESEND_API_KEY')
+        resend.Emails.send({
+            "from": "Café Atlas <onboarding@resend.dev>",
+            "to": [email],
+            "subject": "☕ Confirm your Café Atlas subscription",
+            "html": f"""
             <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px">
               <h2 style="color:#2b1a0e">Almost there!</h2>
-              <p>Click the button below to confirm your subscription to Café Atlas updates.
-                 You'll be notified when new cafés are added.</p>
+              <p>Click the button below to confirm your subscription.</p>
               <a href="{link}"
                  style="display:inline-block;background:#c0854a;color:#fff;
                         padding:12px 28px;border-radius:8px;text-decoration:none;
                         font-weight:600;margin:16px 0">
                 Confirm Subscription
               </a>
-              <p style="color:#8a7060;font-size:.85rem">
-                If you didn't request this, ignore this email.
-              </p>
+              <p style="color:#8a7060;font-size:.85rem">If you didn't request this, ignore this email.</p>
             </div>"""
-        )
-        mail.send(msg)
+        })
     except Exception as e:
         print(f"Newsletter email error: {e}")
         return jsonify(
@@ -1201,10 +1164,12 @@ def send_newsletter_notification():
                 unsub_token = serializer.dumps(sub.email, salt='newsletter-unsub')
                 unsub_link  = f"{app.config['BASE_URL']}/newsletter/unsubscribe/{unsub_token}"
 
-                msg = Message(
-                    subject    = subject,
-                    recipients = [sub.email],
-                    html       = f"""
+                resend.api_key = os.environ.get('RESEND_API_KEY')
+                resend.Emails.send({
+                    "from": "Café Atlas <onboarding@resend.dev>",
+                    "to": [sub.email],
+                    "subject": subject,
+                    "html": f"""
                     <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px">
                       <h2 style="color:#2b1a0e">New cafés just added! ☕</h2>
                       <p style="color:#5c3317">Here are the latest spots added to Café Atlas:</p>
@@ -1221,8 +1186,7 @@ def send_newsletter_notification():
                         <a href="{unsub_link}" style="color:#c0854a">Unsubscribe</a>
                       </p>
                     </div>"""
-                )
-                mail.send(msg)
+                })
                 sent_count += 1
             except Exception as e:
                 errors.append(sub.email)
@@ -1233,28 +1197,28 @@ def send_newsletter_notification():
         subject = data.get('subject', '☕ Update from Café Atlas')
         body    = data.get('body',    '<p>Hello from Café Atlas!</p>')
 
-        for sub in subscribers:
-            try:
-                unsub_token = serializer.dumps(sub.email, salt='newsletter-unsub')
-                unsub_link  = f"{app.config['BASE_URL']}/newsletter/unsubscribe/{unsub_token}"
-
-                msg = Message(
-                    subject    = subject,
-                    recipients = [sub.email],
-                    html       = f"""
-                    <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px">
-                      {body}
-                      <hr style="border-color:#ede5d4;margin:24px 0"/>
-                      <p style="color:#8a7060;font-size:.78rem">
-                        You're receiving this because you subscribed to Café Atlas updates.
-                        <a href="{unsub_link}" style="color:#c0854a">Unsubscribe</a>
-                      </p>
-                    </div>"""
-                )
-                mail.send(msg)
-                sent_count += 1
-            except Exception as e:
-                errors.append(sub.email)
+        # for sub in subscribers:
+        #     try:
+        #         unsub_token = serializer.dumps(sub.email, salt='newsletter-unsub')
+        #         unsub_link  = f"{app.config['BASE_URL']}/newsletter/unsubscribe/{unsub_token}"
+        #
+        #         msg = Message(
+        #             subject    = subject,
+        #             recipients = [sub.email],
+        #             html       = f"""
+        #             <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px">
+        #               {body}
+        #               <hr style="border-color:#ede5d4;margin:24px 0"/>
+        #               <p style="color:#8a7060;font-size:.78rem">
+        #                 You're receiving this because you subscribed to Café Atlas updates.
+        #                 <a href="{unsub_link}" style="color:#c0854a">Unsubscribe</a>
+        #               </p>
+        #             </div>"""
+        #         )
+        #         mail.send(msg)
+        #         sent_count += 1
+        #     except Exception as e:
+        #         errors.append(sub.email)
 
     return jsonify(
         success      = f"Notification sent to {sent_count} subscriber(s).",
