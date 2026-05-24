@@ -49,7 +49,8 @@ app.config.update(
     JWT_SECRET_KEY            = os.environ.get('JWT_SECRET_KEY'),
     JWT_ACCESS_TOKEN_EXPIRES  = timedelta(hours=24),
 
-    RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY'),
+    BASE_URL       = os.environ.get('BASE_URL', 'http://localhost:5000')
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1192,33 +1193,58 @@ def send_newsletter_notification():
                 errors.append(sub.email)
                 print(f"Failed to send to {sub.email}: {e}")
 
+    # Custom Message
     else:
-        # Custom message
-        subject = data.get('subject', '☕ Update from Café Atlas')
-        body    = data.get('body',    '<p>Hello from Café Atlas!</p>')
 
-        # for sub in subscribers:
-        #     try:
-        #         unsub_token = serializer.dumps(sub.email, salt='newsletter-unsub')
-        #         unsub_link  = f"{app.config['BASE_URL']}/newsletter/unsubscribe/{unsub_token}"
-        #
-        #         msg = Message(
-        #             subject    = subject,
-        #             recipients = [sub.email],
-        #             html       = f"""
-        #             <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px">
-        #               {body}
-        #               <hr style="border-color:#ede5d4;margin:24px 0"/>
-        #               <p style="color:#8a7060;font-size:.78rem">
-        #                 You're receiving this because you subscribed to Café Atlas updates.
-        #                 <a href="{unsub_link}" style="color:#c0854a">Unsubscribe</a>
-        #               </p>
-        #             </div>"""
-        #         )
-        #         mail.send(msg)
-        #         sent_count += 1
-        #     except Exception as e:
-        #         errors.append(sub.email)
+        subject = data.get('subject', '☕ Update from Café Atlas')
+
+        body = data.get('body', '<p>Hello from Café Atlas!</p>')
+
+        for sub in subscribers:
+
+            try:
+
+                unsub_token = serializer.dumps(sub.email, salt='newsletter-unsub')
+
+                unsub_link = f"{os.environ.get('BASE_URL', 'http://localhost:5000')}/newsletter/unsubscribe/{unsub_token}"
+
+                resend.api_key = os.environ.get('RESEND_API_KEY')
+
+                resend.Emails.send({
+
+                    "from": "Café Atlas <onboarding@resend.dev>",
+
+                    "to": [sub.email],
+
+                    "subject": subject,
+
+                    "html": f"""
+
+                    <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px">
+
+                      {body}
+
+                      <hr style="border-color:#ede5d4;margin:24px 0"/>
+
+                      <p style="color:#8a7060;font-size:.78rem">
+
+                        You're receiving this because you subscribed to Café Atlas updates.
+
+                        <a href="{unsub_link}" style="color:#c0854a">Unsubscribe</a>
+
+                      </p>
+
+                    </div>"""
+
+                })
+
+                sent_count += 1
+
+            except Exception as e:
+
+                errors.append(sub.email)
+
+                print(f"Failed to send to {sub.email}: {e}")
 
     return jsonify(
         success      = f"Notification sent to {sent_count} subscriber(s).",
