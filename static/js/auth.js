@@ -197,11 +197,8 @@ function renderNavbar() {
 
 function showConfirmBanner() {
   if (isLoggedIn() && !isConfirmed()) {
-    // Use the wrapper div (confirm-banner-wrap) not the inner div
     const wrap = document.getElementById('confirm-banner-wrap');
-    if (wrap && !sessionStorage.getItem('bannerDismissed')) {
-      wrap.style.display = 'block';
-    }
+    if (wrap) wrap.style.display = 'block';
   }
 }
 
@@ -210,21 +207,15 @@ function showConfirmBanner() {
 document.addEventListener('DOMContentLoaded', () => {
   renderNavbar();
   showConfirmBanner();
-
-  // Sync mobile menu with desktop nav on load
-  // (in case menu is pre-opened or for accessibility)
-  const desktopArea = document.getElementById('nav-auth-area');
-  const mobileArea  = document.getElementById('mobile-auth-area');
-  if (desktopArea && mobileArea) {
-    // Use MutationObserver to sync mobile menu whenever desktop nav changes
-    const observer = new MutationObserver(() => {
-      const menu = document.getElementById('mobile-nav-menu');
-      if (menu && menu.style.display !== 'none') {
-        mobileArea.innerHTML = desktopArea.innerHTML;
+  // Sync mobile menu with desktop nav whenever nav-auth-area is updated
+  const area = document.getElementById('nav-auth-area');
+  if (area) {
+    new MutationObserver(() => {
+      const mobileMenu = document.getElementById('mobile-menu');
+      const mobileArea = document.getElementById('mobile-auth-area');
+      if (mobileMenu && mobileArea && mobileMenu.style.display === 'flex') {
+        mobileArea.innerHTML = area.innerHTML;
       }
-    });
-    if (desktopArea) {
-      observer.observe(desktopArea, { childList: true, subtree: true });
-    }
+    }).observe(area, { childList: true, subtree: true });
   }
 });
